@@ -3,7 +3,7 @@ import axios from 'axios';
 import Config from 'react-native-config';
 import { getToken, removeToken } from '../utils/storage'; // Adjust the import path to your store
 
-const API_BASE_URL = Config.REACT_APP_API_URL || 'http://192.168.0.10:3000/api';
+const API_BASE_URL = Config.REACT_APP_API_URL || 'https://service.kkfinsure.org/api';
 
 const client = axios.create({
   baseURL: API_BASE_URL,
