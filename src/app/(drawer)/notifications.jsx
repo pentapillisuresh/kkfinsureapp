@@ -1,15 +1,14 @@
 import { useNavigation, useRouter } from 'expo-router';
 import {
-  BarChart3,
-  Bell,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Gift,
-  Menu,
-  Wallet,
-  TrendingUp,
-  ArrowRight,
+    ArrowRight,
+    Bell,
+    CheckCircle2,
+    Clock,
+    FileText,
+    Gift,
+    Menu,
+    TrendingUp,
+    Wallet
 } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -105,12 +104,12 @@ export default function NotificationsScreen() {
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
           <Image
-            source={require('../../../assets/images/logo.png')}
+            source={require('../../../assets/images/logo3.jpeg')}
             style={{
               width: 80,
               height: 50,
               resizeMode: 'contain',
-              tintColor: '#FFFFFF',
+              
             }}
           />
           <TouchableOpacity onPress={markAllRead}>

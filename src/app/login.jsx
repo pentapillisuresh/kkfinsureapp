@@ -3,24 +3,24 @@ import { useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail, Phone } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Image,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authAPI } from '../api';
 import {
-  getToken,
-  getUser,
-  storeIsLogin,
-  storeToken,
-  storeUser,
+    getToken,
+    getUser,
+    storeIsLogin,
+    storeToken,
+    storeUser,
 } from '../utils/storage'; // adjust path to your secureStore file
 
 const BG = '#FFFFFF';
@@ -135,7 +135,7 @@ export default function LoginScreen() {
           }}
         >
           <Image
-            source={require('../../assets/images/logo.png')}
+            source={require('../../assets/images/logo3.jpeg')}
             style={{
               width: 150,
               height: 150,

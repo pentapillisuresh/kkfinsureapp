@@ -313,8 +313,8 @@ export default function ProfileScreen() {
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
           <Image
-            source={require('../../../../assets/images/logo.png')}
-            style={{ width: 80, height: 50, resizeMode: 'contain', tintColor: '#FFFFFF' }}
+            source={require('../../../../assets/images/logo3.jpeg')}
+            style={{ width: 80, height: 50, resizeMode: 'contain',  }}
           />
           <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
             <Bell color="#FFFFFF" size={24} />
@@ -514,11 +514,11 @@ export default function ProfileScreen() {
           </Section>
 
           {/* Support Info */}
-          <Section title="Support" icon={HeadphonesIcon}>
-            <InfoRow label="Support Email" value="support@finsure.com" />
-            <InfoRow label="Support Phone" value="+91 1800 234 5678" />
-            <InfoRow label="Company Address" value="Finsure Pvt. Ltd., 5th Floor, Trade Centre, Mumbai – 400001" />
-          </Section>
+       <Section title="Support" icon={HeadphonesIcon}>
+  <InfoRow label="Support Email" value="support@kkfinsure.com" />
+  <InfoRow label="Support Phone" value="+91 9483413311" />
+  <InfoRow label="Company Address" value="KK Finsure Pvt. Ltd., 5th Floor, Trade Centre, Mumbai – 400001" />
+</Section>
 
           {/* Logout */}
           <TouchableOpacity

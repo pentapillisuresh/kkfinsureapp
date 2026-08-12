@@ -1,9 +1,9 @@
 import { useNavigation, useRouter } from 'expo-router';
 import { Bell, ChevronRight, Gift, Menu, ShieldCheck, Wallet, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { userAPI } from '../../../api'; // adjust path
+import { userAPI } from '../../../api';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -17,15 +17,14 @@ const LIGHT_BLUE = 'rgba(43, 70, 213, 0.08)';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
-// Helper to format date
 const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-// Helper to get month name
 const getMonthName = (monthKey) => {
+  if (!monthKey) return '';
   const [year, month] = monthKey.split('-');
   const date = new Date(parseInt(year), parseInt(month) - 1, 1);
   return date.toLocaleString('default', { month: 'short' });
@@ -36,27 +35,68 @@ export default function Dashboard() {
   const navigation = useNavigation();
   const router = useRouter();
 
-  // State
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showMaturityModal, setShowMaturityModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeOffers, setActiveOffers] = useState(0);
+  
+  // User info state
+  const [userName, setUserName] = useState('Investor');
+  const [userId, setUserId] = useState('N/A');
+  const [userBatchId, setUserBatchId] = useState('N/A');
+  const [partnerType, setPartnerType] = useState('USER');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Fetch dashboard data
+  // Fetch dashboard data AND user profile
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response = await userAPI.getUserDashboard();
-      if (response.success) {
-        setDashboardData(response.data);
-        // You might also fetch notifications and offers count separately
-        // For now, we'll keep them as 0 or you can add separate APIs.
+      
+      // Fetch both dashboard and profile in parallel
+      const [dashboardResponse, profileResponse] = await Promise.all([
+        userAPI.getUserDashboard(),
+        userAPI.getProfile()
+      ]);
+      
+      console.log('Dashboard Response:', JSON.stringify(dashboardResponse, null, 2));
+      console.log('Profile Response:', JSON.stringify(profileResponse, null, 2));
+      
+      // Set dashboard data
+      if (dashboardResponse.success) {
+        setDashboardData(dashboardResponse.data);
+      } else {
+        Alert.alert('Error', dashboardResponse.message || 'Failed to load dashboard');
       }
+      
+      // Set user info from profile
+      if (profileResponse.success) {
+        const user = profileResponse.data;
+        setUserName(user.fullName || 'Investor');
+        setUserId(user.id || 'N/A');
+        setUserBatchId(user.batchId || 'N/A');
+        setPartnerType(user.partnerType?.toUpperCase() || 'USER');
+      } else {
+        // Fallback: try to get user info from dashboard response
+        const data = dashboardResponse.data;
+        if (data?.user) {
+          setUserName(data.user.fullName || 'Investor');
+          setUserId(data.user.id || 'N/A');
+          setUserBatchId(data.user.batchId || 'N/A');
+          setPartnerType(data.user.partnerType?.toUpperCase() || 'USER');
+        } else if (data?.investments && data.investments.length > 0) {
+          const firstInv = data.investments[0];
+          if (firstInv.user) {
+            setUserName(firstInv.user.fullName || 'Investor');
+            setUserId(firstInv.user.id || 'N/A');
+          }
+        }
+      }
+      
     } catch (error) {
       console.error('Dashboard fetch error:', error);
+      Alert.alert('Error', 'Failed to load dashboard. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,18 +117,13 @@ export default function Dashboard() {
   const totalProfit = summary.totalProfit || 0;
   const totalInvestments = summary.totalInvestments || 0;
   const upcomingMaturity = summary.upcomingMaturity;
-  const upcomingMaturityInvestmentId = summary.upcomingMaturityInvestmentId;
 
-  // Current month income: find the latest month in monthlyReturns
   const currentMonthIncome = monthlyReturns.length > 0 
     ? monthlyReturns[monthlyReturns.length - 1].totalAmount 
     : 0;
 
-  // Last 6 months for graph (take last 6 from monthlyReturns)
   const lastSixMonths = monthlyReturns.slice(-6);
 
-  // For each investment, show in the list
-  // Also prepare maturity dates list for modal
   const maturityDatesList = investments.map(inv => ({
     id: inv.id,
     planName: inv.planName,
@@ -97,7 +132,6 @@ export default function Dashboard() {
     isMatured: inv.isMatured,
   }));
 
-  // Show loading spinner
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: BG }}>
@@ -108,7 +142,7 @@ export default function Dashboard() {
 
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Blue Header Section */}
+      {/* Header Section */}
       <View
         style={{
           backgroundColor: BLUE,
@@ -119,14 +153,13 @@ export default function Dashboard() {
           paddingHorizontal: 20,
         }}
       >
-        {/* Header Row */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
           <Image
-            source={require('../../../../assets/images/logo.png')}
-            style={{ width: 80, height: 50, resizeMode: 'contain', tintColor: '#FFFFFF' }}
+            source={require('../../../../assets/images/logo3.jpeg')}
+            style={{ width: 80, height: 50, resizeMode: 'contain',  }}
           />
           <TouchableOpacity
             onPress={() => router.push('/notifications')}
@@ -156,11 +189,11 @@ export default function Dashboard() {
         {/* Welcome Text */}
         <View style={{ marginTop: 16 }}>
           <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>
-            Hello, {summary.userName || 'Investor'}
+            Hello, {userName || 'Investor'}
           </Text>
         </View>
 
-        {/* Tier and ID – placeholder */}
+        {/* Tier and ID */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
           <View
             style={{
@@ -170,10 +203,12 @@ export default function Dashboard() {
               borderRadius: 20,
             }}
           >
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>PREMIUM</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>
+              {partnerType || 'PREMIUM'}
+            </Text>
           </View>
           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
-            ID: {summary.userId || 'N/A'}
+            ID: {userBatchId !== 'N/A' ? userBatchId : userId.slice(0, 8) || 'N/A'}
           </Text>
         </View>
       </View>
@@ -183,7 +218,6 @@ export default function Dashboard() {
           paddingHorizontal: 20,
           paddingBottom: insets.bottom + 20,
           paddingTop: 20,
-          paddingBottom: 140,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -229,7 +263,7 @@ export default function Dashboard() {
             </View>
           </View>
 
-          {/* 4 Small Stats Cards */}
+          {/* Stats Cards */}
           <View style={{ marginBottom: 20 }}>
             <Text style={{ color: MUTED, fontSize: 13, fontWeight: '600', marginBottom: 12 }}>
               Portfolio Overview
@@ -276,7 +310,7 @@ export default function Dashboard() {
             </View>
           </View>
 
-          {/* Quick Actions Row */}
+          {/* Quick Actions */}
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             <TouchableOpacity
               onPress={() => router.push('/notifications')}
@@ -338,7 +372,7 @@ export default function Dashboard() {
             </TouchableOpacity>
           </View>
 
-          {/* ROI Performance Section */}
+          {/* ROI Performance */}
           <View style={{ marginBottom: 24 }}>
             <Text style={{ color: TEXT, fontSize: 18, fontWeight: '700', marginBottom: 16 }}>
               ROI Performance (Last 6 Months)
@@ -358,7 +392,6 @@ export default function Dashboard() {
                 elevation: 2,
               }}
             >
-              {/* Y-Axis Labels – dynamic based on max value */}
               {lastSixMonths.length > 0 ? (
                 <>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -371,11 +404,10 @@ export default function Dashboard() {
                     <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>0</Text>
                   </View>
 
-                  {/* Bar Chart */}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 140, marginBottom: 12 }}>
                     {lastSixMonths.map((item, index) => {
                       const maxVal = Math.max(...lastSixMonths.map(m => m.totalAmount), 1);
-                      const height = (item.totalAmount / maxVal) * 120; // max height 120
+                      const height = (item.totalAmount / maxVal) * 120;
                       return (
                         <View key={index} style={{ alignItems: 'center', flex: 1 }}>
                           <View
@@ -395,7 +427,6 @@ export default function Dashboard() {
                     })}
                   </View>
 
-                  {/* Legend */}
                   <View
                     style={{
                       flexDirection: 'row',
@@ -425,7 +456,7 @@ export default function Dashboard() {
             </View>
           </View>
 
-          {/* My Investments Section */}
+          {/* My Investments */}
           <View style={{ marginBottom: 24 }}>
             <View
               style={{
@@ -461,6 +492,7 @@ export default function Dashboard() {
                   shadowRadius: 8,
                   elevation: 2,
                 }}
+                onPress={() => router.push(`/investment/${inv.id}`)}
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <View>
@@ -543,7 +575,7 @@ export default function Dashboard() {
         </Animated.View>
       </ScrollView>
 
-      {/* Maturity Dates Bottom Sheet Modal */}
+      {/* Maturity Dates Modal */}
       <Modal
         visible={showMaturityModal}
         transparent
@@ -555,12 +587,7 @@ export default function Dashboard() {
           activeOpacity={1}
           onPress={() => setShowMaturityModal(false)}
         >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'flex-end',
-            }}
-          >
+          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
             <View
               style={{
                 backgroundColor: 'white',

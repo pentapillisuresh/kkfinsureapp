@@ -2,15 +2,15 @@ import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import {
-  BarChart3,
-  FileText,
-  Gift,
-  HeadphonesIcon,
-  LayoutDashboard,
-  LogOut, Ticket,
-  User,
-  Users,
-  Wallet
+    BarChart3,
+    FileText,
+    Gift,
+    HeadphonesIcon,
+    LayoutDashboard,
+    LogOut, Ticket,
+    User,
+    Users,
+    Wallet
 } from 'lucide-react-native';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -68,7 +68,7 @@ function CustomDrawerContent(props) {
         }}
       >
         <Image
-          source={require('../../../assets/images/logo.png')} style={{ width: 80, height: 50, resizeMode: 'contain', tintColor: '#FFFFFF' }}
+          source={require('../../../assets/images/logo3.jpeg')} style={{ width: 80, height: 50, resizeMode: 'contain',  }}
         />
         <View>
           {/* <Text style={{ color: TEXT, fontSize: 20, fontWeight: '800', letterSpacing: 0.5 }}>

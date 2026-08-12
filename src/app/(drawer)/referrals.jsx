@@ -126,8 +126,8 @@ export default function ReferralsScreen() {
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
           <Image
-            source={require('../../../assets/images/logo.png')}
-            style={{ width: 80, height: 50, resizeMode: 'contain', tintColor: '#FFFFFF' }}
+            source={require('../../../assets/images/logo3.jpeg')}
+            style={{ width: 80, height: 50, resizeMode: 'contain',  }}
           />
           <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
             <Bell color="#FFFFFF" size={24} />
