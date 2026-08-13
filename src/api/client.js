@@ -1,47 +1,78 @@
 // api/client.js
 import axios from 'axios';
-import Config from 'react-native-config';
-import { getToken, removeToken } from '../utils/storage'; // Adjust the import path to your store
+import Constants from 'expo-constants';
+import { getToken, removeToken } from '../utils/storage';
 
-const API_BASE_URL = Config.REACT_APP_API_URL || 'https://service.kkfinsure.org/api';
+// Get API URL from Constants or use default
+const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'https://service.kkfinsure.org/api';
+
+console.log('API Base URL:', API_BASE_URL);
 
 const client = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000,
 });
 
-// Request interceptor – attach token from the global auth store
+// Request interceptor – attach token from storage
 client.interceptors.request.use(
   async (config) => {
-    // Read the current auth state from the Zustand store (sync)
-    const token = await getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    } catch (error) {
+      console.log('Error getting token:', error);
+      return config;
     }
-    return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.log('Request error:', error);
+    return Promise.reject(error);
+  }
 );
 
-// Response interceptor – handle 401 and clear auth state
+// Response interceptor
 client.interceptors.response.use(
-  (response) => response.data, // Return only the `data` object
+  (response) => {
+    return response.data || response;
+  },
   async (error) => {
     const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Mark as retried to avoid infinite loops
       originalRequest._retry = true;
-      // Clear the authentication state (this triggers a logout)
-      await removeToken();
-      // The useRequireAuth hook will automatically open the login modal
-      // if the user is on a protected screen.
+      try {
+        await removeToken();
+        console.log('Session expired - please login again');
+        // Optionally emit an event or navigate to login
+      } catch (clearError) {
+        console.log('Error clearing session:', clearError);
+      }
     }
-    // Log the error for debugging (optional)
-    console.log('API Error:', error);
-    // Reject with a structured error object
-    return Promise.reject(error.response?.data || { message: 'Network error' });
+
+    // Handle network errors
+    if (!error.response) {
+      return Promise.reject({
+        success: false,
+        message: 'Network error. Please check your internet connection.',
+        status: 0,
+      });
+    }
+
+    // Handle other errors
+    const errorData = error.response.data || {};
+    return Promise.reject({
+      success: false,
+      status: error.response.status,
+      message: errorData.message || errorData.error || 'An unexpected error occurred',
+      data: errorData,
+    });
   }
 );
 

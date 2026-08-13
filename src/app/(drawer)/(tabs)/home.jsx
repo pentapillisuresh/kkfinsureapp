@@ -142,25 +142,33 @@ export default function Dashboard() {
 
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Header Section */}
+          {/* Header Section */}
       <View
         style={{
           backgroundColor: BLUE,
-          height: 200,
+          height: 225, // Increased height slightly for the larger logo
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
           paddingTop: insets.top + 10,
           paddingHorizontal: 20,
         }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          <Image
-            source={require('../../../../assets/images/logo3.jpeg')}
-            style={{ width: 80, height: 50, resizeMode: 'contain',  }}
-          />
+          
+          {/* Logo & Tagline Container */}
+          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+            <Image
+              source={require('../../../../assets/images/logo3.jpeg')}
+              style={{ width: 120, height: 50, resizeMode: 'contain' }} // Width increased to 120
+            />
+            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
+              Wealth | Trust | Growth
+            </Text>
+          </View>
+
           <TouchableOpacity
             onPress={() => router.push('/notifications')}
             style={{ position: 'relative' }}
@@ -187,8 +195,8 @@ export default function Dashboard() {
         </View>
 
         {/* Welcome Text */}
-        <View style={{ marginTop: 16 }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>
+        <View style={{ marginTop: 18 }}>
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>
             Hello, {userName || 'Investor'}
           </Text>
         </View>
@@ -560,17 +568,7 @@ export default function Dashboard() {
               borderColor: 'rgba(43, 70, 213, 0.1)',
             }}
           >
-            <View style={{ backgroundColor: BLUE, padding: 8, borderRadius: 12 }}>
-              <ShieldCheck color="#fff" size={20} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: TEXT, fontWeight: '700', fontSize: 14 }}>
-                SEBI Registered & Secure
-              </Text>
-              <Text style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>
-                All investments are managed under SEBI guidelines.
-              </Text>
-            </View>
+            
           </View>
         </Animated.View>
       </ScrollView>

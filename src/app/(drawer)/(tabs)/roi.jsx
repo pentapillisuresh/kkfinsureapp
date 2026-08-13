@@ -146,31 +146,39 @@ export default function ROIScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Blue Header */}
+      {/* Blue Header (Height Increased to 210) */}
       <View
         style={{
           backgroundColor: BLUE,
-          height: 160,
+          height: 210,
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
           paddingTop: insets.top + 10,
           paddingHorizontal: 20,
         }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          <Image
-            source={require('../../../../assets/images/logo3.jpeg')}
-            style={{ width: 80, height: 50, resizeMode: 'contain',  }}
-          />
+          
+          {/* Logo & Tagline Container */}
+          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+            <Image
+              source={require('../../../../assets/images/logo3.jpeg')}
+              style={{ width: 120, height: 50, resizeMode: 'contain' }}
+            />
+            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
+              Wealth | Trust | Growth
+            </Text>
+          </View>
+
           <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
             <Bell color="#FFFFFF" size={24} />
           </TouchableOpacity>
         </View>
 
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 16 }}>
           <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>ROI Dashboard</Text>
           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
             Track your returns and performance
@@ -182,7 +190,7 @@ export default function ROIScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingBottom: insets.bottom + 20,
-          paddingTop: 20,
+          paddingTop: 24, // Added spacing between Blue header and White card
         }}
         showsVerticalScrollIndicator={false}
       >
