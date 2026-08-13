@@ -1,23 +1,89 @@
+import { Feather } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { Feather } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 import { balanceSheetsAPI } from '../../api/balanceSheets';
 
-const months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
+// ---- Custom Dropdown Component ----
+const CustomDropdown = ({ label, options, selectedValue, onSelect, placeholder }) => {
+  const [modalVisible, setModalVisible] = useState(false);
 
+  const selectedLabel = options.find(opt => opt.value === selectedValue)?.label || placeholder;
+
+  return (
+    <View>
+      <Text style={styles.label}>{label}</Text>
+      <TouchableOpacity
+        style={styles.dropdownButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={[styles.dropdownButtonText, !selectedValue && { color: '#999' }]}>
+          {selectedLabel}
+        </Text>
+        <Feather name="chevron-down" size={20} color="#666" />
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderTitle}>{label}</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Feather name="x" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={options}
+              keyExtractor={(item) => item.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionItem,
+                    item.value === selectedValue && styles.optionItemSelected,
+                  ]}
+                  onPress={() => {
+                    onSelect(item.value);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      item.value === selectedValue && styles.optionTextSelected,
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+};
+
+// ---- Main Component ----
 const BalanceSheetScreen = () => {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  // state
+
   const [startMonth, setStartMonth] = useState('');
   const [startYear, setStartYear] = useState('');
   const [endMonth, setEndMonth] = useState('');
@@ -28,6 +94,28 @@ const BalanceSheetScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const [generatedData, setGeneratedData] = useState(null);
 
+  // Month options for dropdown
+  const monthOptions = [
+    { label: 'Jan', value: 'Jan' },
+    { label: 'Feb', value: 'Feb' },
+    { label: 'Mar', value: 'Mar' },
+    { label: 'Apr', value: 'Apr' },
+    { label: 'May', value: 'May' },
+    { label: 'Jun', value: 'Jun' },
+    { label: 'Jul', value: 'Jul' },
+    { label: 'Aug', value: 'Aug' },
+    { label: 'Sep', value: 'Sep' },
+    { label: 'Oct', value: 'Oct' },
+    { label: 'Nov', value: 'Nov' },
+    { label: 'Dec', value: 'Dec' },
+  ];
+
+  // Year options – current year ± 5
+  const currentYear = new Date().getFullYear();
+  const yearOptions = [];
+  for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+    yearOptions.push({ label: String(i), value: String(i) });
+  }
 
   const handleGenerate = async () => {
     if (!startMonth || !startYear || !endMonth || !endYear) {
@@ -35,11 +123,9 @@ const BalanceSheetScreen = () => {
       return;
     }
 
-    // Build date strings: YYYY-MM-01
-    const startDate = `${startYear}-${String(months.indexOf(startMonth) + 1).padStart(2, '0')}-01`;
-    const endDate = `${endYear}-${String(months.indexOf(endMonth) + 1).padStart(2, '0')}-01`;
+    const startDate = `${startYear}-${String(monthOptions.findIndex(m => m.value === startMonth) + 1).padStart(2, '0')}-01`;
+    const endDate = `${endYear}-${String(monthOptions.findIndex(m => m.value === endMonth) + 1).padStart(2, '0')}-01`;
 
-    // Validate: end date should be after start date
     if (new Date(startDate) > new Date(endDate)) {
       Alert.alert('Invalid Period', 'Start date cannot be after end date.');
       return;
@@ -104,7 +190,6 @@ const BalanceSheetScreen = () => {
       const ws2 = XLSX.utils.aoa_to_sheet(txData);
       XLSX.utils.book_append_sheet(wb, ws2, 'Transactions');
 
-      // Write file
       const wbout = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
       const filename = FileSystem.documentDirectory + `balance_sheet_${Date.now()}.xlsx`;
       await FileSystem.writeAsStringAsync(filename, wbout, { encoding: FileSystem.EncodingType.Base64 });
@@ -114,11 +199,10 @@ const BalanceSheetScreen = () => {
     }
   };
 
-  // Download as PDF (placeholder – we'll use a simple text file for demo)
+  // Download as PDF (simple text for demo)
   const downloadPDF = async () => {
     if (!generatedData) return;
     try {
-      // For demo, we'll generate a simple text summary
       const content = `
         BALANCE SHEET
         User: ${generatedData.user.fullName}
@@ -139,71 +223,60 @@ const BalanceSheetScreen = () => {
     }
   };
 
-  // Render transaction item
   const renderItem = ({ item }) => (
     <View style={styles.transactionRow}>
       <Text style={styles.txDate}>{item.formattedDate}</Text>
       <Text style={styles.txDesc} numberOfLines={1}>{item.description}</Text>
       <Text style={[styles.txAmount, item.amount < 0 ? styles.negative : styles.positive]}>
-        {item.amount < 0 ? '-' : '+'}{item.amount}
+        {item.amount < 0 ? '-' : '+'}{Math.abs(item.amount)}
       </Text>
       <Text style={styles.txBalance}>₹{item.balance}</Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <Text style={styles.title}>Balance Sheet</Text>
       <Text style={styles.subtitle}>Select period to generate statement</Text>
 
       <View style={styles.row}>
         <View style={styles.half}>
-          <Text style={styles.label}>Start Month</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={startMonth}
-              onValueChange={(itemValue) => setStartMonth(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select" value="" />
-              {months.map(m => <Picker.Item key={m} label={m} value={m} />)}
-            </Picker>
-          </View>
+          <CustomDropdown
+            label="Start Month"
+            options={monthOptions}
+            selectedValue={startMonth}
+            onSelect={setStartMonth}
+            placeholder="Select month"
+          />
         </View>
         <View style={styles.half}>
-          <Text style={styles.label}>Start Year</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., 2025"
-            keyboardType="numeric"
-            value={startYear}
-            onChangeText={setStartYear}
+          <CustomDropdown
+            label="Start Year"
+            options={yearOptions}
+            selectedValue={startYear}
+            onSelect={setStartYear}
+            placeholder="Select year"
           />
         </View>
       </View>
 
       <View style={styles.row}>
         <View style={styles.half}>
-          <Text style={styles.label}>End Month</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={endMonth}
-              onValueChange={(itemValue) => setEndMonth(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select" value="" />
-              {months.map(m => <Picker.Item key={m} label={m} value={m} />)}
-            </Picker>
-          </View>
+          <CustomDropdown
+            label="End Month"
+            options={monthOptions}
+            selectedValue={endMonth}
+            onSelect={setEndMonth}
+            placeholder="Select month"
+          />
         </View>
         <View style={styles.half}>
-          <Text style={styles.label}>End Year</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., 2025"
-            keyboardType="numeric"
-            value={endYear}
-            onChangeText={setEndYear}
+          <CustomDropdown
+            label="End Year"
+            options={yearOptions}
+            selectedValue={endYear}
+            onSelect={setEndYear}
+            placeholder="Select year"
           />
         </View>
       </View>
@@ -226,7 +299,7 @@ const BalanceSheetScreen = () => {
         animationType="slide"
         onRequestClose={() => setShowModal(false)}
       >
-        <View style={[styles.modalContainer, { paddingTop: insets.top + 20 }]}>
+        <SafeAreaView style={[styles.modalContainer, { paddingTop: 20 }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Balance Sheet</Text>
             <TouchableOpacity onPress={() => setShowModal(false)}>
@@ -276,9 +349,9 @@ const BalanceSheetScreen = () => {
               </TouchableOpacity>
             </View>
           </ScrollView>
-        </View>
+        </SafeAreaView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -289,23 +362,46 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   half: { flex: 1 },
   label: { fontSize: 13, fontWeight: '600', color: '#1A2332', marginBottom: 6 },
-  input: {
+
+  // Custom dropdown
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#fff',
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E8ECF0',
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: '#E8ECF0',
-    fontSize: 15,
+    paddingVertical: 12,
   },
-  pickerWrapper: {
+  dropdownButtonText: { fontSize: 15, color: '#1A2332' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalContent: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E8ECF0',
-    overflow: 'hidden',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    maxHeight: '70%',
   },
-  picker: { height: 44, width: '100%' },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8ECF0',
+  },
+  modalHeaderTitle: { fontSize: 18, fontWeight: '700', color: '#1A2332' },
+  optionItem: {
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8ECF0',
+  },
+  optionItemSelected: { backgroundColor: '#f0f4ff' },
+  optionText: { fontSize: 16, color: '#1A2332' },
+  optionTextSelected: { fontWeight: '700', color: '#2B46D5' },
+
   generateButton: {
     backgroundColor: '#2B46D5',
     borderRadius: 14,
@@ -314,6 +410,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+
   modalContainer: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 20 },
   modalHeader: {
     flexDirection: 'row',

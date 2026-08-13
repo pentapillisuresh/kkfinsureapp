@@ -2,15 +2,15 @@ import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import {
-    BarChart3,
-    FileText,
-    Gift,
-    HeadphonesIcon,
-    LayoutDashboard,
-    LogOut, Ticket,
-    User,
-    Users,
-    Wallet
+  BarChart3,
+  FileText,
+  Gift,
+  HeadphonesIcon,
+  LayoutDashboard,
+  LogOut, Ticket,
+  User,
+  Users,
+  Wallet
 } from 'lucide-react-native';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +36,7 @@ function CustomDrawerContent(props) {
     { label: 'Documents', icon: FileText, path: '/documents' },
     { label: 'Offers', icon: Gift, path: '/offers' },
     { label: 'Referral Program', icon: Users, path: '/referrals' },
+    { label: 'Balance Sheet', icon: Users, path: '/balanceSheet' },
     { label: 'Tickets', icon: Ticket, path: '/tickets' },
     { label: 'Profile', icon: User, path: '/profile' },
     { label: 'Support', icon: HeadphonesIcon, path: '/support' },
@@ -181,6 +182,7 @@ export default function DrawerLayout() {
       <Drawer.Screen name="offers" options={{ title: 'Offers' }} />
       <Drawer.Screen name="referrals" options={{ title: 'Referrals' }} />
       <Drawer.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Drawer.Screen name="balanceSheet" options={{ title: 'Balance Sheet' }} />
       <Drawer.Screen name="support" options={{ title: 'Support' }} />
     </Drawer>
   );
