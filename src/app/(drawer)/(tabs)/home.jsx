@@ -59,10 +59,7 @@ export default function Dashboard() {
         userAPI.getUserDashboard(),
         userAPI.getProfile()
       ]);
-      
-      console.log('Dashboard Response:', JSON.stringify(dashboardResponse, null, 2));
-      console.log('Profile Response:', JSON.stringify(profileResponse, null, 2));
-      
+            
       // Set dashboard data
       if (dashboardResponse.success) {
         setDashboardData(dashboardResponse.data);
