@@ -59,6 +59,7 @@ export default function ROIScreen() {
       if (summaryRes.success) setSummary(summaryRes.data);
       if (returnsRes.success) setReturns(returnsRes.data.returns || []);
       if (investmentsRes.success) setInvestments(investmentsRes.data || []);
+      console.log("investment::", investmentsRes.data)
     } catch (error) {
       console.error('ROI fetch error:', error);
     } finally {
@@ -91,7 +92,7 @@ export default function ROIScreen() {
 
   // 3. Pending ROI (total unpaid returns)
   const pendingROI = returns
-    .filter(r => r.paidOn === null)
+    .filter(r => r.status !== 'active')
     .reduce((sum, r) => sum + parseFloat(r.amount), 0);
 
   // 4. ROI History Table: group by month? Actually the mock table shows each return entry.
@@ -104,10 +105,36 @@ export default function ROIScreen() {
     status: r.paidOn !== null ? 'Paid' : 'Pending',
   }));
 
+  const totalInvestment = investments
+    .filter(i => i.status === 'active')
+    .reduce(
+      (sum, i) => sum + (parseFloat(i.amount) || 0),
+      0
+    );
+
+  const netROIPercent = totalInvestment
+    ? (paidROI / totalInvestment) * 100
+    : 0;
+
+  const now = new Date();
+
+  const sixMonthsAgo = new Date(
+    now.getFullYear(),
+    now.getMonth() - 5,
+    1
+  );
+
+  const monthlyPaidReturns = returns.filter(r => {
+    if (!r.paidOn) return false;
+    const paidDate = new Date(r.paidOn);
+
+    return paidDate >= sixMonthsAgo && paidDate <= now;
+  });
+
   // 5. ROI Bar Graph: aggregate returns by month (based on month field, not paidOn)
   const monthlyAggregates = {};
-  returns.forEach(r => {
-    const monthKey = r.month.slice(0, 7); // YYYY-MM
+  monthlyPaidReturns.forEach(r => {
+    const monthKey = r.paidOn.slice(0, 7); // YYYY-MM
     if (!monthlyAggregates[monthKey]) monthlyAggregates[monthKey] = 0;
     monthlyAggregates[monthKey] += parseFloat(r.amount);
   });
@@ -161,7 +188,7 @@ export default function ROIScreen() {
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          
+
           {/* Logo & Tagline Container */}
           <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
             <Image
@@ -211,15 +238,35 @@ export default function ROIScreen() {
               }}
             >
               <Text style={{ color: 'rgba(255,255,255,0.8)', alignSelf: 'center', fontSize: 15, fontWeight: '600' }}>
-                Current Month ROI
+              Net ROI Percent
               </Text>
               <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800', alignSelf: 'center', marginTop: 4 }}>
-                {fmt(currentMonthROI)}
+                {`${netROIPercent}%`}
               </Text>
             </View>
           </View>
 
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: CARD,
+                borderRadius: 16,
+                padding: 16,
+                borderWidth: 1,
+                borderColor: BORDER,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.04,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
+            >
+              <Text style={{ color: MUTED, fontSize: 11, fontWeight: '600' }}>Current Month Payout</Text>
+              <Text style={{ color: GREEN, fontSize: 20, fontWeight: '800', marginTop: 4 }}>
+                {fmt(currentMonthROI)}
+              </Text>
+            </View>
             <View
               style={{
                 flex: 1,
@@ -552,7 +599,10 @@ export default function ROIScreen() {
                   </Text>
                   <Text style={{ color: MUTED, fontSize: 11, marginTop: 2 }}>
                     {investmentPerformance.length > 0
-                      ? `${investmentPerformance.reduce((sum, inv) => sum + inv.progress, 0) / investmentPerformance.length}% average`
+                      ? `${Math.round(
+                        investmentPerformance.reduce((sum, inv) => sum + inv.progress, 0) /
+                        investmentPerformance.length
+                      )}% average`
                       : 'No data'}
                   </Text>
                 </View>

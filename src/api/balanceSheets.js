@@ -12,3 +12,4 @@ export const balanceSheetsAPI = {
     client.get(`/balance-sheets/user/${userId}/${id}`),
   generateBalanceSheet: (data) => client.post(`/balance-sheets/my/generate`, data),
 };
+

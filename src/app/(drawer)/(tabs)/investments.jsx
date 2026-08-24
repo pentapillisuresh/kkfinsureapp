@@ -91,7 +91,7 @@ function InvestmentModal({ inv, onClose }) {
 
           {/* Detail Rows */}
           {[
-            { label: 'Investment ID', value: inv.id },
+            { label: 'Investment ID', value: inv.InvestmentCode },
             { label: 'Plan', value: inv.plan?.name || 'N/A' },
             { label: 'Amount', value: fmt(inv.amount) },
             { label: 'ROI', value: `${inv.plan?.monthlyReturnPercent || 0}% per month` },
@@ -186,10 +186,15 @@ export default function InvestmentsScreen() {
 
   // Compute totals
   const totalInvestment = investments.reduce((s, i) => s + parseFloat(i.amount), 0);
-  const totalMonthlyROI = investments.reduce((s, i) => {
-    const monthlyPercent = i.plan?.monthlyReturnPercent || 0;
-    return s + (parseFloat(i.amount) * monthlyPercent) / 100;
+  const totalMonthlyROI = investments
+  .filter(i => i.status === 'active')
+  .reduce((sum, i) => {
+    const amount = parseFloat(i.amount) || 0;
+    const monthlyPercent = parseFloat(i.plan?.monthlyReturnPercent) || 0;
+
+    return sum + (amount * monthlyPercent) / 100;
   }, 0);
+  
   const unreadCount = NOTIFICATIONS.filter((n) => !n.read).length;
 
   // Group by plan name
@@ -219,7 +224,7 @@ export default function InvestmentsScreen() {
       <View
         style={{
           backgroundColor: BLUE,
-          height: 210, 
+          height: 210,
           borderBottomLeftRadius: 30,
           borderBottomRightRadius: 30,
           paddingTop: insets.top + 10,
@@ -230,7 +235,7 @@ export default function InvestmentsScreen() {
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          
+
           {/* Logo & Tagline Container */}
           <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
             <Image
@@ -362,158 +367,158 @@ export default function InvestmentsScreen() {
               </View>
 
               {/* Horizontal Scroll of Investments */}
-             <FlatList
-  data={invs}
-  horizontal
-  keyExtractor={(item) => item.id}
-  showsHorizontalScrollIndicator={false}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      onPress={() => setSelectedInv(item)}
-      style={{
-        width: 300,
-        backgroundColor: CARD,
-        borderRadius: 16,
-        padding: 18,
-        marginRight: 12,
-        borderWidth: 1,
-        borderColor: BORDER,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
-        elevation: 2,
-      }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 14,
-        }}
-      >
-        <View>
-          <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>
-            ID
-          </Text>
+              <FlatList
+                data={invs}
+                // horizontal
+                keyExtractor={(item) => item.id}
+                style={{marginBottom:50}}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => setSelectedInv(item)}
+                    style={{
+                      backgroundColor: CARD,
+                      borderRadius: 16,
+                      padding: 15,
+                      marginVertical: 8,
+                      borderWidth: 1,
+                      borderColor: BORDER,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.04,
+                      shadowRadius: 8,
+                      elevation: 2,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 14,
+                      }}
+                    >
+                      <View>
+                        <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>
+                          ID
+                        </Text>
 
-          <Text
-            style={{
-              color: TEXT,
-              fontSize: 16,
-              fontWeight: '700',
-              marginTop: 2,
-            }}
-          >
-            {item.id.slice(0, 8)}...
-          </Text>
-        </View>
+                        <Text
+                          style={{
+                            color: TEXT,
+                            fontSize: 16,
+                            fontWeight: '700',
+                            marginTop: 2,
+                          }}
+                        >
+                          {item.InvestmentCode}
+                        </Text>
+                      </View>
 
-        <View
-          style={{
-            backgroundColor:
-              item.status === 'active'
-                ? LIGHT_GREEN
-                : LIGHT_BLUE,
-            borderRadius: 20,
-            paddingHorizontal: 14,
-            paddingVertical: 6,
-          }}
-        >
-          <Text
-            style={{
-              color:
-                item.status === 'active'
-                  ? GREEN
-                  : BLUE,
-              fontSize: 12,
-              fontWeight: '700',
-            }}
-          >
-            {item.status.toUpperCase()}
-          </Text>
-        </View>
-      </View>
+                      <View
+                        style={{
+                          backgroundColor:
+                            item.status === 'active'
+                              ? LIGHT_GREEN
+                              : LIGHT_BLUE,
+                          borderRadius: 20,
+                          paddingHorizontal: 14,
+                          paddingVertical: 6,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              item.status === 'active'
+                                ? GREEN
+                                : BLUE,
+                            fontSize: 12,
+                            fontWeight: '700',
+                          }}
+                        >
+                          {item.status.toUpperCase()}
+                        </Text>
+                      </View>
+                    </View>
 
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: MUTED, fontSize: 11 }}>
-            Investment
-          </Text>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: MUTED, fontSize: 11 }}>
+                          Investment
+                        </Text>
 
-          <Text
-            style={{
-              color: TEXT,
-              fontSize: 16,
-              fontWeight: '700',
-              marginTop: 3,
-            }}
-          >
-            {fmt(item.amount)}
-          </Text>
-        </View>
+                        <Text
+                          style={{
+                            color: TEXT,
+                            fontSize: 16,
+                            fontWeight: '700',
+                            marginTop: 3,
+                          }}
+                        >
+                          {fmt(item.amount)}
+                        </Text>
+                      </View>
 
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: MUTED, fontSize: 11 }}>
-            ROI
-          </Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: MUTED, fontSize: 11 }}>
+                          ROI
+                        </Text>
 
-          <Text
-            style={{
-              color: BLUE,
-              fontSize: 16,
-              fontWeight: '700',
-              marginTop: 3,
-            }}
-          >
-            {item.plan?.monthlyReturnPercent || 0}%
-          </Text>
-        </View>
-      </View>
+                        <Text
+                          style={{
+                            color: BLUE,
+                            fontSize: 16,
+                            fontWeight: '700',
+                            marginTop: 3,
+                          }}
+                        >
+                          {item.plan?.monthlyReturnPercent || 0}%
+                        </Text>
+                      </View>
+                    </View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          marginTop: 14,
-          paddingTop: 12,
-          borderTopWidth: 1,
-          borderTopColor: BORDER,
-          justifyContent: 'space-between',
-        }}
-      >
-        <View>
-          <Text style={{ color: MUTED, fontSize: 11 }}>
-            Maturity
-          </Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        marginTop: 14,
+                        paddingTop: 12,
+                        borderTopWidth: 1,
+                        borderTopColor: BORDER,
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <View>
+                        <Text style={{ color: MUTED, fontSize: 11 }}>
+                          Maturity
+                        </Text>
 
-          <Text
-            style={{
-              color: TEXT,
-              fontSize: 13,
-              fontWeight: '500',
-              marginTop: 2,
-            }}
-          >
-            {formatDate(item.maturityDate)}
-          </Text>
-        </View>
+                        <Text
+                          style={{
+                            color: TEXT,
+                            fontSize: 13,
+                            fontWeight: '500',
+                            marginTop: 2,
+                          }}
+                        >
+                          {formatDate(item.maturityDate)}
+                        </Text>
+                      </View>
 
-        <View style={{ alignSelf: 'center' }}>
-          <Text
-            style={{
-              color: BLUE,
-              fontSize: 12,
-              fontWeight: '600',
-            }}
-          >
-            View →
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  )}
-/>
+                      <View style={{ alignSelf: 'center' }}>
+                        <Text
+                          style={{
+                            color: BLUE,
+                            fontSize: 12,
+                            fontWeight: '600',
+                          }}
+                        >
+                          View →
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
             </View>
           ))}
         </Animated.View>

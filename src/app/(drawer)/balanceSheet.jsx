@@ -4,8 +4,8 @@ import * as Print from 'expo-print';
 import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as XLSX from 'xlsx';
 import { balanceSheetsAPI } from '../../api/balanceSheets';
 
@@ -40,7 +40,7 @@ const CustomDropdown = ({ label, options, selectedValue, onSelect, placeholder }
           onPress={() => setModalVisible(false)}
         >
           <View style={styles.modalContent}>
-           <View style={styles.dropdownModalHeader}>
+            <View style={styles.dropdownModalHeader}>
               <Text style={styles.modalHeaderTitle}>{label}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Feather name="x" size={24} color="#333" />
@@ -124,7 +124,7 @@ const BalanceSheetScreen = () => {
     }
 
     const startDate = `${startYear}-${String(monthOptions.findIndex(m => m.value === startMonth) + 1).padStart(2, '0')}-01`;
-    const endDate = `${endYear}-${String(monthOptions.findIndex(m => m.value === endMonth) + 1).padStart(2, '0')}-01`;
+    const endDate = `${endYear}-${String(monthOptions.findIndex(m => m.value === endMonth) + 1).padStart(2, '0')}-28`;
 
     if (new Date(startDate) > new Date(endDate)) {
       Alert.alert('Invalid Period', 'Start date cannot be after end date.');
@@ -137,6 +137,37 @@ const BalanceSheetScreen = () => {
         periodStart: startDate,
         periodEnd: endDate,
       });
+
+      console.log(
+        "startDate:",
+        startDate
+      );
+
+      console.log(
+        "endDate:",
+        endDate
+      );
+
+      console.log(
+        "BALANCE SHEET RESPONSE:",
+        JSON.stringify(response, null, 2)
+      );
+      
+      console.log(
+        "USER:",
+        JSON.stringify(response?.data?.user, null, 2)
+      );
+      
+      console.log(
+        "TRANSACTION COUNT:",
+        response?.data?.transactions?.length
+      );
+      
+      console.log(
+        "TRANSACTIONS:",
+        JSON.stringify(response?.data?.transactions, null, 2)
+      );
+      
       if (response.success) {
         setGeneratedData(response.data);
         setSummary(response.data.summary);
@@ -161,9 +192,9 @@ const BalanceSheetScreen = () => {
 
     try {
       setLoading(true);
-      
+
       const wb = XLSX.utils.book_new();
-      
+
       // Summary Sheet
       const summaryData = [
         ['BALANCE SHEET SUMMARY'],
@@ -176,7 +207,7 @@ const BalanceSheetScreen = () => {
         ['TOTALS'],
         ['Total Investments:', generatedData.summary.totalInvestments],
         ['Total Returns:', generatedData.summary.totalReturns],
-        ['Total Commissions:', generatedData.summary.totalCommissions],
+        ['Total referrer payouts', generatedData.summary.totalCommissions],
         ['Net Worth:', generatedData.summary.netWorth],
       ];
       const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
@@ -187,13 +218,14 @@ const BalanceSheetScreen = () => {
       const txData = [
         ['Date', 'Description', 'Type', 'Amount (₹)', 'Balance (₹)']
       ];
-      
+
       if (generatedData.transactions && generatedData.transactions.length > 0) {
         generatedData.transactions.forEach(tx => {
           txData.push([
             tx.formattedDate || tx.date || '',
             tx.description || '',
             tx.type || '',
+            tx.ROI || '',
             tx.amount || 0,
             tx.balance || 0,
           ]);
@@ -201,7 +233,7 @@ const BalanceSheetScreen = () => {
       } else {
         txData.push(['No transactions found', '', '', '', '']);
       }
-      
+
       const ws2 = XLSX.utils.aoa_to_sheet(txData);
       ws2['!cols'] = [
         { wch: 15 },
@@ -213,43 +245,43 @@ const BalanceSheetScreen = () => {
       XLSX.utils.book_append_sheet(wb, ws2, 'Transactions');
 
       // Generate file
-      const wbout = XLSX.write(wb, { 
-        type: 'base64', 
+      const wbout = XLSX.write(wb, {
+        type: 'base64',
         bookType: 'xlsx',
         bookSST: false,
       });
-      
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       const filename = `balance_sheet_${timestamp}.xlsx`;
       const filePath = FileSystem.documentDirectory + filename;
-      
+
       await FileSystem.writeAsStringAsync(filePath, wbout, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      
+
       const fileInfo = await FileSystem.getInfoAsync(filePath);
       if (!fileInfo.exists) {
         throw new Error('File was not created successfully');
       }
-      
+
       const isSharingAvailable = await Sharing.isAvailableAsync();
       if (!isSharingAvailable) {
         Alert.alert('Error', 'Sharing is not available on this device');
         return;
       }
-      
+
       await Sharing.shareAsync(filePath, {
         mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         dialogTitle: 'Download Balance Sheet',
         UTI: 'com.microsoft.excel.xlsx',
       });
-      
+
       Alert.alert('Success', 'Excel file downloaded successfully!');
-      
+
     } catch (error) {
       console.error('Excel generation error:', error);
       Alert.alert(
-        'Export Error', 
+        'Export Error',
         'Failed to generate Excel file. Please try CSV format.'
       );
     } finally {
@@ -266,24 +298,24 @@ const BalanceSheetScreen = () => {
 
     try {
       setLoading(true);
-      
+
       let csvContent = '';
-      
+
       csvContent += 'BALANCE SHEET SUMMARY\n\n';
       csvContent += `User,${generatedData.user.fullName}\n`;
       csvContent += `Email,${generatedData.user.email}\n`;
       csvContent += `Period Start,${generatedData.summary.period.start}\n`;
       csvContent += `Period End,${generatedData.summary.period.end}\n\n`;
-      
+
       csvContent += 'TOTALS\n';
       csvContent += `Total Investments,${generatedData.summary.totalInvestments}\n`;
       csvContent += `Total Returns,${generatedData.summary.totalReturns}\n`;
-      csvContent += `Total Commissions,${generatedData.summary.totalCommissions}\n`;
+      csvContent += `Total referrer payouts,${generatedData.summary.totalCommissions}\n`;
       csvContent += `Net Worth,${generatedData.summary.netWorth}\n\n`;
-      
+
       csvContent += 'TRANSACTIONS\n';
       csvContent += 'Date,Description,Type,Amount (₹),Balance (₹)\n';
-      
+
       if (generatedData.transactions && generatedData.transactions.length > 0) {
         generatedData.transactions.forEach(tx => {
           const date = (tx.formattedDate || tx.date || '').replace(/,/g, '');
@@ -294,28 +326,28 @@ const BalanceSheetScreen = () => {
       } else {
         csvContent += 'No transactions found,,,,';
       }
-      
+
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       const filename = `balance_sheet_${timestamp}.csv`;
       const filePath = FileSystem.documentDirectory + filename;
-      
+
       await FileSystem.writeAsStringAsync(filePath, csvContent, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-      
+
       const isSharingAvailable = await Sharing.isAvailableAsync();
       if (!isSharingAvailable) {
         Alert.alert('Error', 'Sharing is not available on this device');
         return;
       }
-      
+
       await Sharing.shareAsync(filePath, {
         mimeType: 'text/csv',
         dialogTitle: 'Download Balance Sheet',
       });
-      
+
       Alert.alert('Success', 'CSV file downloaded successfully!');
-      
+
     } catch (error) {
       console.error('CSV generation error:', error);
       Alert.alert('Export Error', 'Failed to generate CSV file.');
@@ -325,37 +357,37 @@ const BalanceSheetScreen = () => {
   };
 
   const getLogoBase64 = async () => {
-  try {
-    const asset = Image.resolveAssetSource(
-      require('../../../assets/images/logo3.jpeg')
-    );
+    try {
+      const asset = Image.resolveAssetSource(
+        require('../../../assets/images/logo3.jpeg')
+      );
 
-    const response = await fetch(asset.uri);
-    const blob = await response.blob();
+      const response = await fetch(asset.uri);
+      const blob = await response.blob();
 
-    return await new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-      reader.onloadend = () => {
-        resolve(reader.result);
-      };
+        reader.onloadend = () => {
+          resolve(reader.result);
+        };
 
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error('Logo conversion error:', error);
-    return null;
-  }
-};
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Logo conversion error:', error);
+      return null;
+    }
+  };
 
   // Download as PDF
   const downloadPDF = async () => {
     if (!generatedData) return;
     try {
-     const LOGO_DATA_URI = await getLogoBase64();
-    
-      
+      const LOGO_DATA_URI = await getLogoBase64();
+
+
       const htmlContent = `
         <html>
           <head>
@@ -484,11 +516,10 @@ const BalanceSheetScreen = () => {
               <!-- LOGO ADDED HERE (Now using Data URI) -->
              <!-- Logo -->
 <div class="logo-container">
-  ${
-    LOGO_DATA_URI
-      ? `<img src="${LOGO_DATA_URI}" alt="KKFinsure Logo" />`
-      : ''
-  }
+  ${LOGO_DATA_URI
+          ? `<img src="${LOGO_DATA_URI}" alt="KKFinsure Logo" />`
+          : ''
+        }
   <div class="tagline">Wealth | Trust | Growth</div>
 </div>
               
@@ -497,7 +528,7 @@ const BalanceSheetScreen = () => {
               <div class="header">
                 <p><strong>User:</strong> ${generatedData.user.fullName}</p>
                 <p><strong>Email:</strong> ${generatedData.user.email}</p>
-                <p><strong>Period:</strong> ${generatedData.summary.period.start.slice(0,7)} to ${generatedData.summary.period.end.slice(0,7)}</p>
+                <p><strong>Period:</strong> ${generatedData.summary.period.start.slice(0, 7)} to ${generatedData.summary.period.end.slice(0, 7)}</p>
               </div>
               
               <div class="summary">
@@ -571,16 +602,54 @@ const BalanceSheetScreen = () => {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.transactionRow}>
-      <Text style={styles.txDate}>{item.formattedDate}</Text>
-      <Text style={styles.txDesc} numberOfLines={1}>{item.description}</Text>
-      <Text style={[styles.txAmount, item.amount < 0 ? styles.negative : styles.positive]}>
-        {item.amount < 0 ? '-' : '+'}{Math.abs(item.amount)}
-      </Text>
-      <Text style={styles.txBalance}>₹{item.balance}</Text>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const isCredit =
+      item.type === "return" || item.type === "commission";
+
+    const isDebit = item.type === "debit";
+
+    return (
+      <View style={styles.transactionRow}>
+        {/* Date */}
+        <Text style={styles.txDate}>
+          {item.formattedDate || "-"}
+        </Text>
+
+        {/* ROI */}
+        <Text style={styles.txDesc} numberOfLines={1}>
+        {item.ROI ? `${parseInt(item.ROI, 10)}%` : "-"}        </Text>
+
+        {/* Credit Amount */}
+        <Text
+          style={[
+            styles.txAmount,
+            styles.positive,
+          ]}
+        >
+          {isCredit && item.amount > 0
+            ? `+${item.amount}`
+            : ""}
+        </Text>
+
+        {/* Debit Amount */}
+        <Text
+          style={[
+            styles.txAmount,
+            styles.negative,
+          ]}
+        >
+          {isDebit && item.amount < 0
+            ? `-${Math.abs(item.amount)}`
+            : ""}
+        </Text>
+
+        {/* Balance */}
+        <Text style={styles.txBalance}>
+          ₹{item.balance ?? 0}
+        </Text>
+      </View>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7fa' }}>
@@ -599,7 +668,7 @@ const BalanceSheetScreen = () => {
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          
+
           {/* Logo & Tagline Container */}
           <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
             <Image
@@ -695,8 +764,8 @@ const BalanceSheetScreen = () => {
 
             {/* Main Content Area - Buttons now at the top */}
             <View style={{ flex: 1 }}>
-              <ScrollView 
-                showsVerticalScrollIndicator={false} 
+              <ScrollView
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 10, paddingBottom: 30 }}
               >
                 {/* Buttons section - MOVED TO THE TOP */}
@@ -706,15 +775,15 @@ const BalanceSheetScreen = () => {
                       <Feather name="file-text" size={20} color="#fff" />
                       <Text style={styles.downloadBtnText}>PDF</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[styles.downloadBtn, { backgroundColor: '#0f9d58' }]} 
+                    <TouchableOpacity
+                      style={[styles.downloadBtn, { backgroundColor: '#0f9d58' }]}
                       onPress={downloadExcel}
                     >
                       <Feather name="file" size={20} color="#fff" />
                       <Text style={styles.downloadBtnText}>Excel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[styles.downloadBtn, { backgroundColor: '#f39c12' }]} 
+                    <TouchableOpacity
+                      style={[styles.downloadBtn, { backgroundColor: '#f39c12' }]}
                       onPress={downloadCSV}
                     >
                       <Feather name="file" size={20} color="#fff" />
@@ -725,7 +794,7 @@ const BalanceSheetScreen = () => {
 
                 {summary && (
                   <View style={styles.summaryCard}>
-                    <Text style={styles.summaryLabel}>Period: {summary.period.start.slice(0,7)} to {summary.period.end.slice(0,7)}</Text>
+                    <Text style={styles.summaryLabel}>Period: {summary.period.start.slice(0, 7)} to {summary.period.end.slice(0, 7)}</Text>
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryItem}>Investments: ₹{summary.totalInvestments}</Text>
                       <Text style={styles.summaryItem}>Returns: ₹{summary.totalReturns}</Text>
@@ -740,8 +809,9 @@ const BalanceSheetScreen = () => {
                 <Text style={styles.tableHeader}>Transactions</Text>
                 <View style={styles.tableHeaderRow}>
                   <Text style={styles.thDate}>Date</Text>
-                  <Text style={styles.thDesc}>Description</Text>
-                  <Text style={styles.thAmount}>Amount</Text>
+                  <Text style={styles.thDesc}>ROI</Text>
+                  <Text style={styles.thAmount}>Cr.Amt</Text>
+                  <Text style={styles.thAmount}>Dt.Amt</Text>
                   <Text style={styles.thBalance}>Balance</Text>
                 </View>
 
@@ -853,7 +923,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E8ECF0',
   },
   txDate: { flex: 0.25, fontSize: 12, color: '#1A2332' },
-  txDesc: { flex: 0.35, fontSize: 12, color: '#1A2332' },
+  txDesc: { flex: 0.2, fontSize: 12, color: '#1A2332' },
   txAmount: { flex: 0.2, textAlign: 'right', fontWeight: 'bold' },
   positive: { color: '#7CB80B' },
   negative: { color: '#E03333' },

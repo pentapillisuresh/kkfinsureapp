@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { referralsAPI } from '../../api/referrals'; // adjust path
+import { getUser } from '../../utils/storage';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -54,6 +55,9 @@ export default function ReferralsScreen() {
       setLoading(true);
       const response = await referralsAPI.getMyReferrals({ page: 1, limit: 20 });
       if (response.success) {
+        const userDetails=await getUser();
+
+        setReferralId(userDetails.batchId)
         setReferralData(response.data);
         // Set referralId from user profile if available, or generate a placeholder
         // For now, we can set a static ID or fetch from user profile

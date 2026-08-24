@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authAPI, userAPI } from '../../../api';
+import { removeIsLogin, removeToken, removeUser } from '../../../utils/storage';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -221,7 +222,14 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => router.replace('/login') },
+      {
+        text: 'Logout', style: 'destructive', onPress: () => {
+          removeToken();
+          removeUser();
+          removeIsLogin();
+          router.replace('/login')
+        }
+      },
     ]);
   };
 
@@ -312,7 +320,7 @@ export default function ProfileScreen() {
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
-          
+
           {/* Logo & Tagline Container */}
           <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
             <Image
@@ -522,13 +530,13 @@ export default function ProfileScreen() {
           </Section>
 
           {/* Support Info */}
-       <Section title="Support" icon={HeadphonesIcon}>
-  <InfoRow label="Support Email" value="support@kkfinsure.com" />
-  <InfoRow label="Support Phone" value="+91 9483413311" />
-  <InfoRow label="Company Address" value="CTS No. 338, 1st Main West, 5th Cross,
+          <Section title="Support" icon={HeadphonesIcon}>
+            <InfoRow label="Support Email" value="support@kkfinsure.com" />
+            <InfoRow label="Support Phone" value="+91 9483413311" />
+            <InfoRow label="Company Address" value="CTS No. 338, 1st Main West, 5th Cross,
 Kumarswami Layout,
 Belgaum – 590019, Karnataka" />
-</Section>
+          </Section>
 
           {/* Logout */}
           <TouchableOpacity

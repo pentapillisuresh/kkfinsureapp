@@ -43,7 +43,8 @@ function CustomDrawerContent(props) {
           removeToken();
           removeUser();
           removeIsLogin();
-          router.replace('/login')},
+          router.replace('/login')
+        },
       },
     ]);
   };
@@ -64,18 +65,20 @@ function CustomDrawerContent(props) {
         }}
       >
         <Image
-          source={require('../../../assets/images/logo3.jpeg')} style={{ width: 80, height: 50, resizeMode: 'contain',  }}
+          source={require('../../../assets/images/logo3.jpeg')} style={{ width: 80, height: 50, resizeMode: 'contain', }}
         />
         <View>
           {/* <Text style={{ color: TEXT, fontSize: 20, fontWeight: '800', letterSpacing: 0.5 }}>
             FINSURE
           </Text> */}
           <Text style={{ color: GREEN, fontSize: 11, fontWeight: '600', letterSpacing: 1, marginTop: 2 }}>
-            PREMIUM INVESTOR
+            PREMIUM INVESTORS
           </Text>
+      <Text style={{ color: '#333333', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
+        Wealth | Trust | Growth
+      </Text>
         </View>
       </View>
-
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={{
