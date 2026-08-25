@@ -59,9 +59,8 @@ export default function Dashboard() {
       if (dashboardResponse.success) {
         setDashboardData(dashboardResponse.data);
         // Set offers count from dashboard data
-        const offersCount = dashboardResponse.data?.activeOffers || 0;
+        const offersCount = dashboardResponse.data?.summary?.activeOffers || 0;
         setActiveOffers(offersCount);
-        console.log('Active Offers:', offersCount);
       } else {
         Alert.alert('Error', dashboardResponse.message || 'Failed to load dashboard');
       }
