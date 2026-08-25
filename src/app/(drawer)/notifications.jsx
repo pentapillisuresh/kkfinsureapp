@@ -81,61 +81,64 @@ export default function NotificationsScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* Updated Blue Header Section */}
-      <View
+   {/* Updated Blue Header Section */}
+<View
+  style={{
+    backgroundColor: BLUE,
+    height: 210,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    paddingTop: insets.top + 10,
+    paddingHorizontal: 20,
+  }}
+>
+  {/* Header Row */}
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    }}
+  >
+    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+      <Menu color="#FFFFFF" size={26} />
+    </TouchableOpacity>
+
+    {/* Logo & Tagline Container */}
+    <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+      <Image
+        source={require('../../../assets/images/logo3.jpeg')}
         style={{
-          backgroundColor: BLUE,
-          height: 210,
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
-          paddingTop: insets.top + 10,
-          paddingHorizontal: 20,
+          width: 130,
+          height: 50,
+          resizeMode: 'contain',
         }}
-      >
-        {/* Header Row */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-          }}
-        >
-          <TouchableOpacity onPress={() => navigation.openDrawer()}>
-            <Menu color="#FFFFFF" size={26} />
-          </TouchableOpacity>
+      />
+      <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 2, opacity: 0.9 }}>
+        Asset - Wealth Management
+      </Text>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
+        Wealth || Trust || Growth
+      </Text>
+    </View>
 
-          {/* Logo & Tagline Container */}
-          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
-            <Image
-              source={require('../../../assets/images/logo3.jpeg')}
-              style={{
-                width: 120,
-                height: 50,
-                resizeMode: 'contain',
-              }}
-            />
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
-              Wealth | Trust | Growth
-            </Text>
-          </View>
+    <TouchableOpacity onPress={markAllRead}>
+      <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '600', opacity: 0.8 }}>
+        Mark All Read
+      </Text>
+    </TouchableOpacity>
+  </View>
 
-          <TouchableOpacity onPress={markAllRead}>
-            <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '600', opacity: 0.8 }}>
-              Mark All Read
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Title */}
-        <View style={{ marginTop: 16 }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>
-            Notifications
-          </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
-            Stay updated with your investments
-          </Text>
-        </View>
-      </View>
+  {/* Title */}
+  <View style={{ marginTop: 16 }}>
+    <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>
+      Notifications
+    </Text>
+    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
+      Stay updated with your investments
+    </Text>
+  </View>
+</View>
 
       <ScrollView
         contentContainerStyle={{ 

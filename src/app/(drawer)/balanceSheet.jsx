@@ -654,42 +654,45 @@ const BalanceSheetScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7fa' }}>
       {/* New Blue Header */}
-      <View
-        style={{
-          backgroundColor: '#2B46D5',
-          height: 210,
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
-          paddingTop: insets.top + 10,
-          paddingHorizontal: 20,
-        }}
-      >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Feather name="arrow-left" color="#FFFFFF" size={26} />
-          </TouchableOpacity>
+  <View
+  style={{
+    backgroundColor: '#2B46D5',
+    height: 210,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    paddingTop: insets.top + 10,
+    paddingHorizontal: 20,
+  }}
+>
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <TouchableOpacity onPress={() => router.back()}>
+      <Feather name="arrow-left" color="#FFFFFF" size={26} />
+    </TouchableOpacity>
 
-          {/* Logo & Tagline Container */}
-          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
-            <Image
-              source={require('../../../assets/images/logo3.jpeg')}
-              style={{ width: 120, height: 50, resizeMode: 'contain' }}
-            />
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
-              Wealth | Trust | Growth
-            </Text>
-          </View>
+    {/* Logo & Tagline Container */}
+    <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+      <Image
+        source={require('../../../assets/images/logo3.jpeg')}
+        style={{ width: 130, height: 50, resizeMode: 'contain' }}
+      />
+      <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 2, opacity: 0.9 }}>
+        Asset - Wealth Management
+      </Text>
+      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
+        Wealth || Trust || Growth
+      </Text>
+    </View>
 
-          <View style={{ width: 24 }} />
-        </View>
+    <View style={{ width: 24 }} />
+  </View>
 
-        <View style={{ marginTop: 16 }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>Balance Sheet</Text>
-          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
-            Generate and manage your statements
-          </Text>
-        </View>
-      </View>
+  <View style={{ marginTop: 16 }}>
+    <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>Balance Sheet</Text>
+    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
+      Generate and manage your statements
+    </Text>
+  </View>
+</View>
 
       <SafeAreaView style={{ flex: 1, paddingHorizontal: 20, paddingTop: 24 }}>
         <Text style={styles.subtitle}>Select period to generate statement</Text>
