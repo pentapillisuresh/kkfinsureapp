@@ -51,34 +51,51 @@ function CustomDrawerContent(props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: DRAWER_BG }}>
-      {/* Header */}
-      <View
-        style={{
-          paddingHorizontal: 24,
-          paddingTop: insets.top + 24,
-          paddingBottom: 24,
-          borderBottomWidth: 1,
-          borderBottomColor: BORDER,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 16,
-        }}
-      >
-        <Image
-          source={require('../../../assets/images/logo3.jpeg')} style={{ width: 80, height: 50, resizeMode: 'contain', }}
-        />
-        <View>
-          {/* <Text style={{ color: TEXT, fontSize: 20, fontWeight: '800', letterSpacing: 0.5 }}>
-            FINSURE
-          </Text> */}
-          <Text style={{ color: GREEN, fontSize: 11, fontWeight: '600', letterSpacing: 1, marginTop: 2 }}>
-            PREMIUM INVESTORS
-          </Text>
-      <Text style={{ color: '#333333', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
-        Wealth | Trust | Growth
+   {/* Header */}
+    {/* Header */}
+<View
+  style={{
+    paddingHorizontal: 24,
+    paddingTop: insets.top + 24,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}
+>
+  {/* Left Section: Logo + Text Below */}
+  <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+    <Image
+      source={require('../../../assets/images/logo3.jpeg')} 
+      style={{ width: 150, height: 55, resizeMode: 'contain' }}
+    />
+    
+    {/* Text Below Logo - Reduced Gap */}
+    <View style={{ alignItems: 'center', marginTop: 0 }}>
+      <Text style={{ 
+        color: TEXT, 
+        fontSize: 13, 
+        fontWeight: '700', 
+        letterSpacing: 0.5 
+      }}>
+        Asset - Wealth Management
       </Text>
-        </View>
-      </View>
+      <Text style={{ 
+        color: '#666666', 
+        fontSize: 11, 
+        fontWeight: '500', 
+        letterSpacing: 0.5, 
+        marginTop: 1 
+      }}>
+        Wealth || Trust || Growth
+      </Text>
+    </View>
+  </View>
+</View>
+
+
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={{

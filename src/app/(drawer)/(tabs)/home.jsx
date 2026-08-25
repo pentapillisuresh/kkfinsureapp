@@ -23,12 +23,6 @@ const formatDate = (dateStr) => {
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const getMonthLabel = (dateStr) => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleString('default', { month: 'short', year: 'numeric' });
-};
-
 const getMonthName = (monthKey) => {
   if (!monthKey) return '';
   const [year, month] = monthKey.split('-');
@@ -64,6 +58,10 @@ export default function Dashboard() {
 
       if (dashboardResponse.success) {
         setDashboardData(dashboardResponse.data);
+        // Set offers count from dashboard data
+        const offersCount = dashboardResponse.data?.activeOffers || 0;
+        setActiveOffers(offersCount);
+        console.log('Active Offers:', offersCount);
       } else {
         Alert.alert('Error', dashboardResponse.message || 'Failed to load dashboard');
       }
@@ -124,7 +122,8 @@ export default function Dashboard() {
     monthMap[monthKey] = (monthMap[monthKey] || 0) + amount;
   });
   const sortedMonths = Object.keys(monthMap).sort();
-  const lastSixMonths = sortedMonths.slice(-6).map(month => ({
+  // Dynamic - show all months available, not just 6
+  const allMonthsData = sortedMonths.map(month => ({
     month,
     totalAmount: monthMap[month],
   }));
@@ -141,6 +140,18 @@ export default function Dashboard() {
     isMatured: inv.isMatured,
   }));
 
+  // Handle investment card press - navigate to investments page
+  const handleInvestmentPress = () => {
+    console.log('Navigating to investments list');
+    router.push('/investments');
+  };
+
+  // Handle View All press - navigate to investments list
+  const handleViewAllPress = () => {
+    console.log('Navigating to investments list');
+    router.push('/investments');
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: BG }}>
@@ -155,25 +166,26 @@ export default function Dashboard() {
       <View
         style={{
           backgroundColor: BLUE,
-          height: 225,
-          borderBottomLeftRadius: 30,
-          borderBottomRightRadius: 30,
           paddingTop: insets.top + 10,
           paddingHorizontal: 20,
+          paddingBottom: 20,
         }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Menu color="#FFFFFF" size={26} />
           </TouchableOpacity>
 
-          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10 }}>
             <Image
               source={require('../../../../assets/images/logo3.jpeg')}
-              style={{ width: 120, height: 50, resizeMode: 'contain' }}
+              style={{ width: 130, height: 45, resizeMode: 'contain' }}
             />
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, opacity: 0.9 }}>
-              Wealth | Trust | Growth
+            <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 1, opacity: 0.9 }}>
+              Asset - Wealth Management
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
+              Wealth || Trust || Growth
             </Text>
           </View>
 
@@ -187,28 +199,29 @@ export default function Dashboard() {
           </TouchableOpacity>
         </View>
 
-        <View style={{ marginTop: 18 }}>
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Hello, {userName || 'Investor'}</Text>
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>Hello, {userName || 'Investor'}</Text>
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
           <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 }}>
             {partnerType && (
-              <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>
+              <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '700' }}>
                 {partnerType === "NONE" ? "investor" : partnerType}
               </Text>
             )}
           </View>
-          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>
+          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>
             ID: {userBatchId !== 'N/A' ? userBatchId : userId.slice(0, 8) || 'N/A'}
           </Text>
         </View>
       </View>
 
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: insets.bottom + 20,
+          paddingBottom: 100,
           paddingTop: 20,
         }}
         showsVerticalScrollIndicator={false}
@@ -294,7 +307,10 @@ export default function Dashboard() {
 
           {/* ── Quick Actions ── */}
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
-            <TouchableOpacity disabled={true} onPress={() => router.push('/notifications')} style={{ flex: 1, backgroundColor: CARD, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: BORDER, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
+            <TouchableOpacity 
+              onPress={() => router.push('/notifications')} 
+              style={{ flex: 1, backgroundColor: CARD, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: BORDER, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+            >
               <View style={{ backgroundColor: LIGHT_BLUE, padding: 8, borderRadius: 12 }}>
                 <Bell size={18} color={BLUE} />
               </View>
@@ -305,7 +321,10 @@ export default function Dashboard() {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/offers')} style={{ flex: 1, backgroundColor: CARD, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: BORDER, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
+            <TouchableOpacity 
+              onPress={() => router.push('/offers')} 
+              style={{ flex: 1, backgroundColor: CARD, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: BORDER, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+            >
               <View style={{ backgroundColor: LIGHT_GREEN, padding: 8, borderRadius: 12 }}>
                 <Gift size={18} color={GREEN} />
               </View>
@@ -321,7 +340,7 @@ export default function Dashboard() {
           {/* ── ROI Performance ── */}
           <View style={{ marginBottom: 24 }}>
             <Text style={{ color: TEXT, fontSize: 18, fontWeight: '700', marginBottom: 16 }}>
-              ROI Performance (Last 6 Months)
+              ROI Performance
             </Text>
 
             <View
@@ -338,27 +357,27 @@ export default function Dashboard() {
                 elevation: 2,
               }}
             >
-              {lastSixMonths.length > 0 ? (
+              {allMonthsData.length > 0 ? (
                 <>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 140, marginBottom: 12 }}>
-                    {lastSixMonths.map((item, index) => {
-                      const maxVal = Math.max(...lastSixMonths.map(m => m.totalAmount), 1);
-                      const height = (item.totalAmount / maxVal) * 120;
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 160, marginBottom: 12 }}>
+                    {allMonthsData.map((item, index) => {
+                      const maxVal = Math.max(...allMonthsData.map(m => m.totalAmount), 1);
+                      const height = (item.totalAmount / maxVal) * 140;
                       return (
                         <View key={index} style={{ alignItems: 'center', flex: 1 }}>
-                          <Text style={{ color: MUTED, fontSize: 9, fontWeight: '600' }}>
+                          <Text style={{ color: MUTED, fontSize: 8, fontWeight: '600' }}>
                             {fmt(item.totalAmount)}
                           </Text>
                           <View
                             style={{
-                              width: 28,
+                              width: 24,
                               height: Math.max(height, 8),
                               backgroundColor: index % 2 === 0 ? GREEN : BLUE,
-                              borderRadius: 6,
-                              marginBottom: 8,
+                              borderRadius: 4,
+                              marginBottom: 6,
                             }}
                           />
-                          <Text style={{ color: MUTED, fontSize: 10, fontWeight: '500' }}>
+                          <Text style={{ color: MUTED, fontSize: 9, fontWeight: '500' }}>
                             {getMonthName(item.month)}
                           </Text>
                         </View>
@@ -379,11 +398,11 @@ export default function Dashboard() {
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <View style={{ width: 12, height: 12, backgroundColor: GREEN, borderRadius: 4 }} />
-                      <Text style={{ color: MUTED, fontSize: 12, fontWeight: '500' }}>Monthly Returns</Text>
+                      <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>Monthly Returns</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <View style={{ width: 12, height: 12, backgroundColor: BLUE, borderRadius: 4 }} />
-                      <Text style={{ color: MUTED, fontSize: 12, fontWeight: '500' }}>Cumulative</Text>
+                      <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>Cumulative</Text>
                     </View>
                   </View>
                 </>
@@ -396,7 +415,7 @@ export default function Dashboard() {
           </View>
 
           {/* ── My Investments ── */}
-          <View style={{ marginBottom: 24 }}>
+          <View style={{ marginBottom: 20 }}>
             <View
               style={{
                 flexDirection: 'row',
@@ -406,71 +425,75 @@ export default function Dashboard() {
               }}
             >
               <Text style={{ color: TEXT, fontSize: 18, fontWeight: '700' }}>My Investments</Text>
-              <TouchableOpacity onPress={() => router.push('/investments')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <TouchableOpacity 
+                onPress={handleViewAllPress}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
                 <Text style={{ color: BLUE, fontSize: 13, fontWeight: '600' }}>View All</Text>
                 <ChevronRight size={14} color={BLUE} />
               </TouchableOpacity>
             </View>
 
-            {investments.map((inv) => (
-              <TouchableOpacity
-                key={inv.id}
-                style={{
-                  backgroundColor: CARD,
-                  borderRadius: 16,
-                  padding: 18,
-                  marginBottom: 12,
-                  borderWidth: 1,
-                  borderColor: BORDER,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  elevation: 2,
-                }}
-                onPress={() => router.push(`/investment/${inv.id}`)}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                  <View>
-                    <Text style={{ color: MUTED, fontSize: 12, fontWeight: '500' }}>
-                      {inv.planName || 'Investment'}
-                    </Text>
-                    <Text style={{ color: TEXT, fontSize: 20, fontWeight: '700', marginTop: 2 }}>
-                      {fmt(inv.amount)}
-                    </Text>
+            {investments.length > 0 ? (
+              investments.map((inv, index) => (
+                <TouchableOpacity
+                  key={inv.id || index}
+                  activeOpacity={0.7}
+                  style={{
+                    backgroundColor: CARD,
+                    borderRadius: 16,
+                    padding: 18,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: BORDER,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.04,
+                    shadowRadius: 8,
+                    elevation: 2,
+                  }}
+                  onPress={handleInvestmentPress}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <View>
+                      <Text style={{ color: MUTED, fontSize: 12, fontWeight: '500' }}>
+                        {inv.planName || 'Investment'}
+                      </Text>
+                      <Text style={{ color: TEXT, fontSize: 20, fontWeight: '700', marginTop: 2 }}>
+                        {fmt(inv.amount)}
+                      </Text>
+                    </View>
+                    <View style={{ backgroundColor: inv.isMatured ? LIGHT_BLUE : LIGHT_GREEN, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 }}>
+                      <Text style={{ color: inv.isMatured ? BLUE : GREEN, fontSize: 12, fontWeight: '700' }}>
+                        {inv.isMatured ? 'Matured' : 'Active'}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={{ backgroundColor: inv.isMatured ? LIGHT_BLUE : LIGHT_GREEN, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 }}>
-                    <Text style={{ color: inv.isMatured ? BLUE : GREEN, fontSize: 12, fontWeight: '700' }}>
-                      {inv.isMatured ? 'Matured' : 'Active'}
-                    </Text>
-                  </View>
-                </View>
 
-                <View style={{ flexDirection: 'row', gap: 24 }}>
-                  <View>
-                    <Text style={{ color: MUTED, fontSize: 12 }}>Maturity</Text>
-                    <Text style={{ color: TEXT, fontSize: 14, fontWeight: '700', marginTop: 2 }}>
-                      {formatDate(inv.maturityDate)}
-                    </Text>
+                  <View style={{ flexDirection: 'row', gap: 24 }}>
+                    <View>
+                      <Text style={{ color: MUTED, fontSize: 12 }}>Maturity</Text>
+                      <Text style={{ color: TEXT, fontSize: 14, fontWeight: '700', marginTop: 2 }}>
+                        {formatDate(inv.maturityDate)}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: MUTED, fontSize: 12 }}>Profit</Text>
+                      <Text style={{ color: GREEN, fontSize: 16, fontWeight: '700', marginTop: 2 }}>
+                        {fmt(inv.totalProfit)}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: MUTED, fontSize: 12 }}>Returns</Text>
+                      <Text style={{ color: BLUE, fontSize: 16, fontWeight: '700', marginTop: 2 }}>
+                        {inv.returnsCount || 0}
+                      </Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={{ color: MUTED, fontSize: 12 }}>Profit</Text>
-                    <Text style={{ color: GREEN, fontSize: 16, fontWeight: '700', marginTop: 2 }}>
-                      {fmt(inv.totalProfit)}
-                    </Text>
-                  </View>
-                  <View>
-                    <Text style={{ color: MUTED, fontSize: 12 }}>Returns</Text>
-                    <Text style={{ color: BLUE, fontSize: 16, fontWeight: '700', marginTop: 2 }}>
-                      {inv.returnsCount}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-
-            {investments.length === 0 && (
-              <View style={{ padding: 40, alignItems: 'center' }}>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <View style={{ padding: 40, alignItems: 'center', backgroundColor: CARD, borderRadius: 16 }}>
                 <Text style={{ color: MUTED, fontSize: 16 }}>No investments yet</Text>
               </View>
             )}
@@ -487,6 +510,7 @@ export default function Dashboard() {
               gap: 14,
               borderWidth: 1,
               borderColor: 'rgba(43, 70, 213, 0.1)',
+              marginBottom: 10,
             }}
           >
             <Text style={{ color: BLUE, fontSize: 14, fontWeight: '600' }}>🔒 Secure Investment</Text>
