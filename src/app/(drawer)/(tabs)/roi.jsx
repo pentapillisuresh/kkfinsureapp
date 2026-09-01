@@ -120,11 +120,12 @@ export default function ROIScreen() {
 
   const sixMonthsAgo = new Date(
     now.getFullYear(),
-    now.getMonth() - 5,
+    now.getMonth()-8,
     1
   );
 
   const monthlyPaidReturns = returns.filter(r => {
+    if (r.status!=="active") return false;
     if (!r.paidOn) return false;
     const paidDate = new Date(r.paidOn);
 
