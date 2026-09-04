@@ -137,36 +137,6 @@ const BalanceSheetScreen = () => {
         periodStart: startDate,
         periodEnd: endDate,
       });
-
-      console.log(
-        "startDate:",
-        startDate
-      );
-
-      console.log(
-        "endDate:",
-        endDate
-      );
-
-      console.log(
-        "BALANCE SHEET RESPONSE:",
-        JSON.stringify(response, null, 2)
-      );
-      
-      console.log(
-        "USER:",
-        JSON.stringify(response?.data?.user, null, 2)
-      );
-      
-      console.log(
-        "TRANSACTION COUNT:",
-        response?.data?.transactions?.length
-      );
-      
-      console.log(
-        "TRANSACTIONS:",
-        JSON.stringify(response?.data?.transactions, null, 2)
-      );
       
       if (response.success) {
         setGeneratedData(response.data);

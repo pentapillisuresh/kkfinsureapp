@@ -1,13 +1,13 @@
-import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { Bell, Building2, DockIcon, Download, FileCheck, FileSpreadsheet, FileText, IndentIcon, LucidePaperclip, Menu, UserCheck, } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Dimensions, Image, Linking, ScrollView, Share, Text, TouchableOpacity, View, } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { documentsAPI } from '../../../api/documents';
 import { investmentsAPI } from '../../../api/investments';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const API_BASE_URL =  'https://service.kkfinsure.org/';
+const API_BASE_URL = 'https://service.kkfinsure.org/';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -69,7 +69,7 @@ const DocItem = ({ doc }) => {
 
   const handleDownload = () => {
     if (doc.filePath) {
-      console.log("doc path ::",`${API_BASE_URL}${doc.filePath}`)
+      console.log("doc path ::", `${API_BASE_URL}${doc.filePath}`)
       Linking.openURL(`${API_BASE_URL}${doc.filePath}`).catch(() => {
         Alert.alert('Error', 'Unable to open the document.');
       });
@@ -158,10 +158,12 @@ export default function DocumentsScreen() {
   const [error, setError] = useState(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    fetchData();
-    Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+    }, [])
+  );
 
   const fetchData = async () => {
     setLoading(true);
@@ -178,7 +180,8 @@ export default function DocumentsScreen() {
       }
 
       if (invRes.success) {
-        setInvestments(invRes.data.investments || []);
+        console.log("rrr::", invRes.data)
+        setInvestments(invRes.data || []);
       } else {
         console.warn('Failed to fetch investments:', invRes.message);
       }
@@ -232,6 +235,7 @@ export default function DocumentsScreen() {
           investment: inv,
         }));
     }
+
     return [];
   };
 
@@ -272,46 +276,46 @@ export default function DocumentsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: BG }}>
       {/* Blue Header */}
-     <View
-  style={{
-    backgroundColor: BLUE,
-    height: 210,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    paddingTop: insets.top + 10,
-    paddingHorizontal: 20,
-  }}
->
-  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-    <TouchableOpacity onPress={() => navigation.openDrawer()}>
-      <Menu color="#FFFFFF" size={26} />
-    </TouchableOpacity>
+      <View
+        style={{
+          backgroundColor: BLUE,
+          height: 210,
+          borderBottomLeftRadius: 30,
+          borderBottomRightRadius: 30,
+          paddingTop: insets.top + 10,
+          paddingHorizontal: 20,
+        }}
+      >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <TouchableOpacity onPress={() => navigation.openDrawer()}>
+            <Menu color="#FFFFFF" size={26} />
+          </TouchableOpacity>
 
-    <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
-      <Image
-        source={require('../../../../assets/images/logo3.jpeg')}
-        style={{ width: 130, height: 50, resizeMode: 'contain' }}
-      />
-      <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 2, opacity: 0.9 }}>
-        Asset - Wealth Management
-      </Text>
-      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
-        Wealth || Trust || Growth
-      </Text>
-    </View>
+          <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10, marginTop: -5 }}>
+            <Image
+              source={require('../../../../assets/images/logo3.jpeg')}
+              style={{ width: 130, height: 50, resizeMode: 'contain' }}
+            />
+            <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 2, opacity: 0.9 }}>
+              Asset - Wealth Management
+            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
+              Wealth || Trust || Growth
+            </Text>
+          </View>
 
-    <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
-      <Bell color="#FFFFFF" size={24} />
-    </TouchableOpacity>
-  </View>
+          <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
+            <Bell color="#FFFFFF" size={24} />
+          </TouchableOpacity>
+        </View>
 
-  <View style={{ marginTop: 16 }}>
-    <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>Documents</Text>
-    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
-      Manage all your important documents
-    </Text>
-  </View>
-</View>
+        <View style={{ marginTop: 16 }}>
+          <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>Documents</Text>
+          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
+            Manage all your important documents
+          </Text>
+        </View>
+      </View>
 
       <ScrollView
         contentContainerStyle={{

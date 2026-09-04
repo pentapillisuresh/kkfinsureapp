@@ -207,7 +207,7 @@ export default function ProfileScreen() {
       setLoading(true);
       const response = await userAPI.getProfile();
       if (response.success) {
-        setProfileData(response.data);
+        setProfileData(response.data.user);
       } else {
         Alert.alert('Error', response.message || 'Failed to load profile');
       }
@@ -535,10 +535,13 @@ export default function ProfileScreen() {
           {/* Support Info */}
           <Section title="Support" icon={HeadphonesIcon}>
             <InfoRow label="Support Email" value="support@kkfinsure.com" />
+            <InfoRow label="Compliance Support" value="compliancekkfi@gmail.com" />
             <InfoRow label="Support Phone" value="+91 9483413311" />
             <InfoRow label="Company Address" value="CTS No. 338, 1st Main West, 5th Cross,
 Kumarswami Layout,
 Belgaum – 590019, Karnataka" />
+            <InfoRow label="Corp Office" value="Mantri IT Park,Viman Nagar pune
+            Maharastra -411014" />
           </Section>
 
           {/* Logout */}

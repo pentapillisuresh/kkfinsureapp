@@ -1,6 +1,6 @@
-import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { Bell, Menu, TrendingUp } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { investmentsAPI, returnsAPI } from '../../../api'; // adjust path
@@ -60,7 +60,7 @@ export default function ROIScreen() {
       if (summaryRes.success) setSummary(summaryRes.data);
       if (returnsRes.success) setReturns(returnsRes.data.returns || []);
       if (investmentsRes.success) setInvestments(investmentsRes.data || []);
-      console.log("investment::", investmentsRes.data)
+
     } catch (error) {
       console.error('ROI fetch error:', error);
     } finally {
@@ -68,11 +68,13 @@ export default function ROIScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+    }, [])
+  );
+  
   // ---- Compute derived data ----
 
   // 1. Current Month ROI: latest month's total paid returns
@@ -260,7 +262,7 @@ export default function ROIScreen() {
                 Net ROI Percent
               </Text>
               <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800', alignSelf: 'center', marginTop: 4 }}>
-                {`${netROIPercent.toFixed(2)}%`}
+                {`${parseInt(netROIPercent)}%`}
               </Text>
             </View>
           </View>

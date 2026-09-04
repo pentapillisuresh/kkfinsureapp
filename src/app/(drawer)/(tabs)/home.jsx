@@ -1,6 +1,6 @@
-import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { Bell, ChevronRight, Gift, Menu, Wallet, X } from 'lucide-react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userAPI } from '../../../api';
@@ -94,10 +94,13 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
+// ─── useFocusEffect: Refresh data when screen comes into focus ────────────
+useFocusEffect(
+  useCallback(() => {
     fetchDashboard();
     Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, []);
+  }, [])
+);
 
   const summary = dashboardData?.summary || {};
   const investments = dashboardData?.investments || [];
@@ -244,8 +247,8 @@ export default function Dashboard() {
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View>
-                <Text style={{ color: MUTED, fontSize: 13, fontWeight: '600' }}>Total Investment</Text>
-                <Text style={{ color: TEXT, fontSize: 32, fontWeight: '800', marginTop: 4 }}>
+                <Text style={{ color: MUTED, fontSize: 13, fontWeight: '600',letterSpacing:1, }}>Total Investment</Text>
+                <Text style={{ color: TEXT, fontSize: 32, fontWeight: '800', marginTop: 4,letterSpacing:1, }}>
                   {fmt(totalInvested)}
                 </Text>
               </View>
@@ -256,12 +259,12 @@ export default function Dashboard() {
 
             <View style={{ flexDirection: 'row', marginTop: 16, gap: 12 }}>
               <View style={{ flex: 1, backgroundColor: LIGHT_GREEN, borderRadius: 12, padding: 12 }}>
-                <Text style={{ color: MUTED, fontSize: 11 }}>Current Value</Text>
-                <Text style={{ color: TEXT, fontSize: 16, fontWeight: '700', marginTop: 2 }}>
+                <Text style={{ color: MUTED, fontSize: 11,letterSpacing:1, }}>Current Value</Text>
+                <Text style={{ color: TEXT, fontSize: 16, fontWeight: '700',letterSpacing:1, marginTop: 2 }}>
                   {fmt(totalCurrentValue)}
                 </Text>
-                <Text style={{ color: GREEN, fontSize: 11, fontWeight: '600', marginTop: 2 }}>
-                  +{totalInvested > 0 ? ((totalProfit / totalInvested) * 100).toFixed(2) : 0}% Overall ROI
+                <Text style={{ color: GREEN, fontSize: 11,letterSpacing:1, fontWeight: '600', marginTop: 2 }}>
+                  +{totalInvested > 0 ? parseInt(((totalProfit / totalInvested) * 100)) : 0}%  Overall ROI
                 </Text>
               </View>
             </View>
