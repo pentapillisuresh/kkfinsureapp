@@ -413,15 +413,16 @@
 //investment
 [
     {
-        "InvestmentCode": "INV20260801",
+        "InvestmentCode": "INV20260819",
         "agreementDoc": null,
-        "amount": "100000.00",
+        "amount": "200000.00",
         "certificateDoc": null,
-        "createdAt": "2026-08-13T08:19:37.000Z",
+        "createdAt": "2026-08-26T13:33:50.000Z",
         "dpcCheck": false,
-        "id": "9c58e31b-b47e-4a4a-b8d9-fb383e0f160f",
-        "investmentDate": "2025-10-18T00:00:00.000Z",
-        "maturityDate": "2026-11-18T01:00:00.000Z",
+        "endReturnDate": null,
+        "id": "841adb8b-a7e4-4f5b-a855-133a5deb82e7",
+        "investmentDate": "2026-02-20T00:00:00.000Z",
+        "maturityDate": "2027-02-20T00:00:00.000Z",
         "plan": {
             "annualBonusPercent": 0,
             "createdAt": "2026-08-13T08:18:33.000Z",
@@ -437,8 +438,9 @@
         },
         "planId": "df3c7fa1-49d9-4521-b550-56a433c18147",
         "postChequeDoc": null,
+        "startReturnDate": null,
         "status": "active",
-        "updatedAt": "2026-08-13T08:19:37.000Z",
-        "userId": "4febb717-288b-4f65-be8f-5ff6c27a8560"
+        "updatedAt": "2026-08-26T13:33:50.000Z",
+        "userId": "5a145e53-f6fe-4850-a633-f7df867a20bc"
     }
 ]

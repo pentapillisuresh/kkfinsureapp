@@ -180,7 +180,6 @@ export default function DocumentsScreen() {
       }
 
       if (invRes.success) {
-        console.log("rrr::", invRes.data)
         setInvestments(invRes.data || []);
       } else {
         console.warn('Failed to fetch investments:', invRes.message);

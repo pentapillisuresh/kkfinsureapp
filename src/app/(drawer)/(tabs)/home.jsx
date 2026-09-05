@@ -66,7 +66,7 @@ export default function Dashboard() {
       }
 
       if (profileResponse.success) {
-        const user = profileResponse.data;
+        const user = profileResponse.data.user;
         setUserName(user.fullName || 'Investor');
         setUserId(user.id || 'N/A');
         setUserBatchId(user.batchId || 'N/A');
