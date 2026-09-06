@@ -299,6 +299,7 @@ export default function ProfileScreen() {
   }
 
   const user = profileData || {};
+
   const nominee = user.nominee || {};
   const bank = user.bankDetail || {};
   const creator = user.creator || {};
@@ -449,7 +450,7 @@ export default function ProfileScreen() {
               }}
             >
               <Text style={{ color: GREEN, fontSize: 12, fontWeight: '700' }}>
-                {user.partnerType?.toUpperCase() || 'USER'}
+                {user.partnerType!=='none'? user.partnerType?.toUpperCase():'INVESTOR'}
               </Text>
             </View>
             <Text style={{ color: MUTED, fontSize: 12, marginTop: 8 }}>
