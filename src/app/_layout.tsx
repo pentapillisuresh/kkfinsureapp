@@ -1,7 +1,9 @@
 // @ts-nocheck
 import { Stack } from 'expo-router';
-import { usePreventScreenCapture } from 'expo-screen-capture';
+import { addScreenshotListener, usePreventScreenCapture } from 'expo-screen-capture';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { Alert, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
