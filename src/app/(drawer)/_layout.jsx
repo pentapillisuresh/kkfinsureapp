@@ -2,7 +2,7 @@ import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { BarChart3, FileText, Gift, HeadphonesIcon, LayoutDashboard, LogOut, Ticket, User, Users, Wallet } from 'lucide-react-native';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { removeIsLogin, removeToken, removeUser } from '../../utils/storage';
 
@@ -15,6 +15,9 @@ const TEXT = '#1A2332';
 const MUTED = '#6B7A8F';
 const LIGHT_GREEN = 'rgba(124, 184, 11, 0.05)';
 const LIGHT_BLUE = 'rgba(43, 70, 213, 0.05)';
+
+// Get screen width for responsive sizing
+const { width } = Dimensions.get('window');
 
 function CustomDrawerContent(props) {
   const insets = useSafeAreaInsets();
@@ -51,50 +54,58 @@ function CustomDrawerContent(props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: DRAWER_BG }}>
-   {/* Header */}
-    {/* Header */}
-<View
-  style={{
-    paddingHorizontal: 24,
-    paddingTop: insets.top + 24,
-    paddingBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }}
->
-  {/* Left Section: Logo + Text Below */}
-  <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-    <Image
-      source={require('../../../assets/images/logo3.jpeg')} 
-      style={{ width: 150, height: 55, resizeMode: 'contain' }}
-    />
-    
-    {/* Text Below Logo - Reduced Gap */}
-    <View style={{ alignItems: 'center', marginTop: 0 }}>
-      <Text style={{ 
-        color: TEXT, 
-        fontSize: 13, 
-        fontWeight: '700', 
-        letterSpacing: 0.5 
-      }}>
-        Asset - Wealth Management
-      </Text>
-      <Text style={{ 
-        color: '#666666', 
-        fontSize: 11, 
-        fontWeight: '500', 
-        letterSpacing: 0.5, 
-        marginTop: 1 
-      }}>
-        Wealth || Trust || Growth
-      </Text>
-    </View>
-  </View>
-</View>
-
+      {/* Header - Improved Alignment */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 20,
+          paddingBottom: 20,
+          borderBottomWidth: 1,
+          borderBottomColor: BORDER,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <View style={{ 
+          alignItems: 'center',
+          width: '100%',
+        }}>
+          <Image
+            source={require('../../../assets/images/logo3.jpeg')}
+            style={{ 
+              width: Math.min(140, width * 0.35),
+              height: 50,
+              resizeMode: 'contain',
+            }}
+          />
+          
+          <View style={{ 
+            alignItems: 'center',
+            marginTop: 6,
+            paddingHorizontal: 8,
+          }}>
+            <Text style={{ 
+              color: TEXT, 
+              fontSize: 13, 
+              fontWeight: '700', 
+              letterSpacing: 0.5,
+              textAlign: 'center',
+            }}>
+              Asset - Wealth Management
+            </Text>
+            <Text style={{ 
+              color: '#666666', 
+              fontSize: 11, 
+              fontWeight: '500', 
+              letterSpacing: 0.5, 
+              marginTop: 2,
+              textAlign: 'center',
+            }}>
+              Wealth || Trust || Growth
+            </Text>
+          </View>
+        </View>
+      </View>
 
       <DrawerContentScrollView
         {...props}
