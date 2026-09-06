@@ -1,9 +1,20 @@
 // @ts-nocheck
 import { Stack } from 'expo-router';
+import { usePreventScreenCapture } from 'expo-screen-capture';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
+  usePreventScreenCapture();
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const subscription = addScreenshotListener(() => {
+        Alert.alert('Screenshot Blocked', 'Screenshots are disabled for security reasons.');
+      });
+      return () => subscription.remove();
+    }
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="light" />
