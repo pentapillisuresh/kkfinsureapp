@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import { Bell, ChevronRight, Gift, Menu, Wallet, X } from 'lucide-react-native';
+import { Bell, ChevronRight, Menu, Wallet, X } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -308,7 +308,7 @@ useFocusEffect(
           </View>
 
           {/* ── Quick Actions ── */}
-          <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+          {/* <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             <TouchableOpacity 
               onPress={() => router.push('/notifications')} 
               style={{ flex: 1, backgroundColor: CARD, borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: BORDER, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
@@ -337,7 +337,7 @@ useFocusEffect(
                 </Text>
               </View>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           {/* ── ROI Performance ── */}
           <View style={{ marginBottom: 24 }}>
