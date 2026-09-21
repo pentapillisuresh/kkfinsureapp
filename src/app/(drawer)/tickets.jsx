@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ticketsAPI } from '../../api/tickets';
+import Disclaimer from '../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -316,6 +317,9 @@ export default function TicketsScreen() {
             ))
           )}
         </Animated.View>
+           <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
 
       {/* Ticket Detail Bottom Sheet */}

@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { userAPI } from '../../../api';
+import Disclaimer from '../../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -519,7 +520,13 @@ useFocusEffect(
             <Text style={{ color: MUTED, fontSize: 12 }}>Your funds are protected</Text>
           </View>
         </Animated.View>
+  <View style={{ marginTop: 20,marginBottom: 40 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
+
+
+
 
       {/* ── Maturity Dates Modal ── */}
       <Modal

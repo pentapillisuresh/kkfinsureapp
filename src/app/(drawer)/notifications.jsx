@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NOTIFICATIONS } from '../../data/mockData';
+import Disclaimer from '../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -347,6 +348,9 @@ export default function NotificationsScreen() {
             </View>
           )}
         </Animated.View>
+             <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
     </View>
   );

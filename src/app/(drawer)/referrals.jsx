@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, Animated, Image, ScrollView, Share, Text, Tou
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { referralsAPI } from '../../api/referrals'; // adjust path
 import { getUser } from '../../utils/storage';
+import Disclaimer from '../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -459,6 +460,10 @@ export default function ReferralsScreen() {
             )}
           </View>
         </Animated.View>
+
+          <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
     </View>
   );

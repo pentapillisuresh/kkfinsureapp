@@ -18,6 +18,8 @@ import {
   UserCheck,
 } from 'lucide-react-native';
 
+import Disclaimer from '../../Disclaimer';
+
 import {
   useCallback,
   useRef,
@@ -1071,6 +1073,7 @@ export default function DocumentsScreen() {
             )
           )}
         </Animated.View>
+                <Disclaimer />
       </ScrollView>
     </View>
   );

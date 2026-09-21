@@ -1,10 +1,30 @@
 import { useNavigation, useRouter } from 'expo-router';
-import { Bell, CheckCircle2, ChevronRight, Download, FileText, Menu, Wallet, X } from 'lucide-react-native';
+import {
+  Bell,
+  CheckCircle2,
+  ChevronRight,
+  Download,
+  FileText,
+  Menu,
+  Wallet,
+  X,
+} from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Animated, FlatList, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { investmentsAPI } from '../../../api'; // adjust path
+import { investmentsAPI } from '../../../api';
 import { NOTIFICATIONS } from '../../../data/mockData';
+import Disclaimer from '../../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -16,20 +36,35 @@ const MUTED = '#6B7A8F';
 const LIGHT_GREEN = 'rgba(124, 184, 11, 0.1)';
 const LIGHT_BLUE = 'rgba(43, 70, 213, 0.08)';
 
-const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
+const fmt = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 
 // Helper to format date
 const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
+
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  return d.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 };
 
+// ============================================================
 // Investment Detail Modal
+// ============================================================
+
 function InvestmentModal({ inv, onClose }) {
   if (!inv) return null;
+
   return (
-    <Modal transparent animationType="slide" visible onRequestClose={onClose}>
+    <Modal
+      transparent
+      animationType="slide"
+      visible
+      onRequestClose={onClose}
+    >
       <View
         style={{
           flex: 1,
@@ -45,7 +80,10 @@ function InvestmentModal({ inv, onClose }) {
             padding: 28,
             paddingBottom: 60,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: -4 },
+            shadowOffset: {
+              width: 0,
+              height: -4,
+            },
             shadowOpacity: 0.1,
             shadowRadius: 20,
             elevation: 10,
@@ -60,44 +98,101 @@ function InvestmentModal({ inv, onClose }) {
               marginBottom: 24,
             }}
           >
-            <Text style={{ color: TEXT, fontSize: 20, fontWeight: '800' }}>Investment Details</Text>
+            <Text
+              style={{
+                color: TEXT,
+                fontSize: 20,
+                fontWeight: '800',
+              }}
+            >
+              Investment Details
+            </Text>
+
             <TouchableOpacity
               onPress={onClose}
-              style={{ backgroundColor: LIGHT_BLUE, borderRadius: 20, padding: 8 }}
+              style={{
+                backgroundColor: LIGHT_BLUE,
+                borderRadius: 20,
+                padding: 8,
+              }}
             >
               <X size={18} color={BLUE} />
             </TouchableOpacity>
           </View>
 
           {/* Status Badge */}
-          <View style={{ alignSelf: 'flex-start', marginBottom: 20 }}>
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              marginBottom: 20,
+            }}
+          >
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 6,
-                backgroundColor: inv.status === 'active' ? LIGHT_GREEN : LIGHT_BLUE,
+                backgroundColor:
+                  inv.status === 'active'
+                    ? LIGHT_GREEN
+                    : LIGHT_BLUE,
                 borderRadius: 20,
                 paddingHorizontal: 12,
                 paddingVertical: 6,
               }}
             >
-              <CheckCircle2 size={14} color={inv.status === 'active' ? GREEN : BLUE} />
-              <Text style={{ color: inv.status === 'active' ? GREEN : BLUE, fontSize: 12, fontWeight: '700' }}>
-                {inv.status.toUpperCase()}
+              <CheckCircle2
+                size={14}
+                color={inv.status === 'active' ? GREEN : BLUE}
+              />
+
+              <Text
+                style={{
+                  color:
+                    inv.status === 'active' ? GREEN : BLUE,
+                  fontSize: 12,
+                  fontWeight: '700',
+                }}
+              >
+                {inv.status?.toUpperCase() || 'N/A'}
               </Text>
             </View>
           </View>
 
           {/* Detail Rows */}
           {[
-            { label: 'Investment ID', value: inv.InvestmentCode },
-            { label: 'Plan', value: inv.plan?.name || 'N/A' },
-            { label: 'Amount', value: fmt(inv.amount) },
-            { label: 'ROI', value: `${inv.plan?.monthlyReturnPercent || 0}% per month` },
-            { label: 'Monthly Return', value: fmt((inv.amount * (inv.plan?.monthlyReturnPercent || 0)) / 100) },
-            { label: 'Investment Date', value: formatDate(inv.investmentDate) },
-            { label: 'Maturity Date', value: formatDate(inv.maturityDate) },
+            {
+              label: 'Investment ID',
+              value: inv.InvestmentCode || 'N/A',
+            },
+            {
+              label: 'Plan',
+              value: inv.plan?.name || 'N/A',
+            },
+            {
+              label: 'Amount',
+              value: fmt(inv.amount),
+            },
+            {
+              label: 'ROI',
+              value: `${inv.plan?.monthlyReturnPercent || 0}% per month`,
+            },
+            {
+              label: 'Monthly Return',
+              value: fmt(
+                (Number(inv.amount || 0) *
+                  Number(inv.plan?.monthlyReturnPercent || 0)) /
+                  100
+              ),
+            },
+            {
+              label: 'Investment Date',
+              value: formatDate(inv.investmentDate),
+            },
+            {
+              label: 'Maturity Date',
+              value: formatDate(inv.maturityDate),
+            },
           ].map((row, i) => (
             <View
               key={i}
@@ -109,15 +204,44 @@ function InvestmentModal({ inv, onClose }) {
                 borderBottomColor: BORDER,
               }}
             >
-              <Text style={{ color: MUTED, fontSize: 13 }}>{row.label}</Text>
-              <Text style={{ color: TEXT, fontSize: 13, fontWeight: '600' }}>{row.value}</Text>
+              <Text
+                style={{
+                  color: MUTED,
+                  fontSize: 13,
+                }}
+              >
+                {row.label}
+              </Text>
+
+              <Text
+                style={{
+                  color: TEXT,
+                  fontSize: 13,
+                  fontWeight: '600',
+                  maxWidth: '60%',
+                  textAlign: 'right',
+                }}
+              >
+                {row.value}
+              </Text>
             </View>
           ))}
 
           {/* Actions */}
-          <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 12,
+              marginTop: 24,
+            }}
+          >
             <TouchableOpacity
-              onPress={() => Alert.alert('Agreement', 'Opening investment agreement...')}
+              onPress={() =>
+                Alert.alert(
+                  'Agreement',
+                  'Opening investment agreement...'
+                )
+              }
               style={{
                 flex: 1,
                 backgroundColor: BLUE,
@@ -130,10 +254,24 @@ function InvestmentModal({ inv, onClose }) {
               }}
             >
               <FileText size={16} color="#fff" />
-              <Text style={{ color: '#fff', fontWeight: '700' }}>Agreement</Text>
+
+              <Text
+                style={{
+                  color: '#fff',
+                  fontWeight: '700',
+                }}
+              >
+                Agreement
+              </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
-              onPress={() => Alert.alert('Certificate', 'Downloading investment certificate...')}
+              onPress={() =>
+                Alert.alert(
+                  'Certificate',
+                  'Downloading investment certificate...'
+                )
+              }
               style={{
                 flex: 1,
                 backgroundColor: LIGHT_BLUE,
@@ -146,7 +284,15 @@ function InvestmentModal({ inv, onClose }) {
               }}
             >
               <Download size={16} color={BLUE} />
-              <Text style={{ color: BLUE, fontWeight: '700' }}>Certificate</Text>
+
+              <Text
+                style={{
+                  color: BLUE,
+                  fontWeight: '700',
+                }}
+              >
+                Certificate
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -155,128 +301,300 @@ function InvestmentModal({ inv, onClose }) {
   );
 }
 
+// ============================================================
+// Investments Screen
+// ============================================================
+
 export default function InvestmentsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const router = useRouter();
+
   const [selectedInv, setSelectedInv] = useState(null);
   const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // ============================================================
+  // Fetch Investments
+  // ============================================================
 
   useEffect(() => {
     fetchInvestments();
-    Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   const fetchInvestments = async () => {
     try {
       setLoading(true);
+
       const response = await investmentsAPI.getMyInvestments();
+
       if (response.success) {
         setInvestments(response.data || []);
       }
     } catch (error) {
       console.error('Fetch investments error:', error);
-      Alert.alert('Error', 'Failed to load investments');
+
+      Alert.alert(
+        'Error',
+        'Failed to load investments'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Compute totals
-  const totalInvestment = investments.reduce((s, i) => s + parseFloat(i.amount), 0);
+  // ============================================================
+  // Compute Totals
+  // ============================================================
+
+  const totalInvestment = investments.reduce(
+    (s, i) => s + (parseFloat(i.amount) || 0),
+    0
+  );
+
   const totalMonthlyROI = investments
-  .filter(i => i.status === 'active')
-  .reduce((sum, i) => {
-    const amount = parseFloat(i.amount) || 0;
-    const monthlyPercent = parseFloat(i.plan?.monthlyReturnPercent) || 0;
+    .filter((i) => i.status === 'active')
+    .reduce((sum, i) => {
+      const amount = parseFloat(i.amount) || 0;
+      const monthlyPercent =
+        parseFloat(i.plan?.monthlyReturnPercent) || 0;
 
-    return sum + (amount * monthlyPercent) / 100;
-  }, 0);
-  
-  const unreadCount = NOTIFICATIONS.filter((n) => !n.read).length;
+      return sum + (amount * monthlyPercent) / 100;
+    }, 0);
 
-  // Group by plan name
+  const unreadCount = NOTIFICATIONS.filter(
+    (n) => !n.read
+  ).length;
+
+  // ============================================================
+  // Group Investments By Plan
+  // ============================================================
+
   const groupedByPlan = {};
+
   investments.forEach((inv) => {
-    const planName = inv.plan?.name || 'Uncategorized';
+    const planName =
+      inv.plan?.name || 'Uncategorized';
+
     if (!groupedByPlan[planName]) {
       groupedByPlan[planName] = [];
     }
+
     groupedByPlan[planName].push(inv);
   });
 
-  // Convert to array for rendering
   const planGroups = Object.entries(groupedByPlan);
+
+  // ============================================================
+  // Loading Screen
+  // ============================================================
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: BG }}>
-        <ActivityIndicator size="large" color={BLUE} />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: BG,
+        }}
+      >
+        <ActivityIndicator
+          size="large"
+          color={BLUE}
+        />
       </View>
     );
   }
 
+  // ============================================================
+  // Main Screen
+  // ============================================================
+
   return (
-    <View style={{ flex: 1, backgroundColor: BG }}>
-      {/* ── Header ── */}
-<View
-  style={{
-    backgroundColor: BLUE,
-    paddingTop: insets.top + 10,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  }}
->
-  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-    <TouchableOpacity onPress={() => navigation.openDrawer()}>
-      <Menu color="#FFFFFF" size={26} />
-    </TouchableOpacity>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: BG,
+      }}
+    >
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
 
-    <View style={{ alignItems: 'center', flex: 1, marginHorizontal: 10 }}>
-      <Image
-        source={require('../../../../assets/images/logo3.jpeg')}
-        style={{ width: 130, height: 50, resizeMode: 'contain' }}
-      />
-      <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '600', letterSpacing: 0.5, marginTop: 2, opacity: 0.9 }}>
-        Asset - Wealth Management
-      </Text>
-      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '500', letterSpacing: 0.3, marginTop: 1 }}>
-        Wealth || Trust || Growth
-      </Text>
-    </View>
+      <View
+        style={{
+          backgroundColor: BLUE,
+          paddingTop: insets.top + 10,
+          paddingHorizontal: 20,
+          paddingBottom: 20,
+        }}
+      >
+        {/* Header Row */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          {/* Menu */}
+          <TouchableOpacity
+            onPress={() => navigation.openDrawer()}
+          >
+            <Menu
+              color="#FFFFFF"
+              size={26}
+            />
+          </TouchableOpacity>
 
-    <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
-      <Bell color="#FFFFFF" size={24} />
-      {unreadCount > 0 && (
-        <View style={{ position: 'absolute', top: -4, right: -4, backgroundColor: '#E03333', borderRadius: 8, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{unreadCount}</Text>
+          {/* Logo */}
+          <View
+            style={{
+              alignItems: 'center',
+              flex: 1,
+              marginHorizontal: 10,
+            }}
+          >
+            <Image
+              source={require('../../../../assets/images/logo3.jpeg')}
+              style={{
+                width: 130,
+                height: 50,
+                resizeMode: 'contain',
+              }}
+            />
+
+            <Text
+              style={{
+                color: '#FFFFFF',
+                fontSize: 10,
+                fontWeight: '600',
+                letterSpacing: 0.5,
+                marginTop: 2,
+                opacity: 0.9,
+              }}
+            >
+              Asset - Wealth Management
+            </Text>
+
+            <Text
+              style={{
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: 9,
+                fontWeight: '500',
+                letterSpacing: 0.3,
+                marginTop: 1,
+              }}
+            >
+              Wealth || Trust || Growth
+            </Text>
+          </View>
+
+          {/* Notifications */}
+          <TouchableOpacity
+            onPress={() => router.push('/notifications')}
+            style={{
+              position: 'relative',
+            }}
+          >
+            <Bell
+              color="#FFFFFF"
+              size={24}
+            />
+
+            {unreadCount > 0 && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  backgroundColor: '#E03333',
+                  borderRadius: 8,
+                  width: 16,
+                  height: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 9,
+                    fontWeight: '700',
+                  }}
+                >
+                  {unreadCount}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
-      )}
-    </TouchableOpacity>
-  </View>
 
-  <View style={{ marginTop: 16 }}>
-    <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>
-      My Investments
-    </Text>
-    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 }}>
-      Track your investment portfolio
-    </Text>
-  </View>
-</View>
+        {/* Page Title */}
+        <View
+          style={{
+            marginTop: 16,
+          }}
+        >
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontSize: 26,
+              fontWeight: '800',
+            }}
+          >
+            My Investments
+          </Text>
+
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: 14,
+              marginTop: 4,
+            }}
+          >
+            Track your investment portfolio
+          </Text>
+        </View>
+      </View>
+
+      {/* ======================================================
+          MAIN SCROLL
+      ====================================================== */}
 
       <ScrollView
+        style={{
+          flex: 1,
+        }}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingBottom: insets.bottom + 20,
-          paddingTop: 16, /* Added 16px spacing so the card doesn't touch the blue curve */
+          paddingTop: 16,
+
+          // IMPORTANT:
+          // Extra bottom space so Disclaimer is never hidden
+          paddingBottom: insets.bottom + 80,
         }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Summary Banner (Improved alignment) */}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+          }}
+        >
+          {/* ==================================================
+              SUMMARY BANNER
+          ================================================== */}
+
           <View
             style={{
               backgroundColor: CARD,
@@ -284,7 +602,10 @@ export default function InvestmentsScreen() {
               padding: 24,
               marginBottom: 24,
               shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
+              shadowOffset: {
+                width: 0,
+                height: 4,
+              },
               shadowOpacity: 0.08,
               shadowRadius: 12,
               elevation: 6,
@@ -292,37 +613,104 @@ export default function InvestmentsScreen() {
               borderColor: BORDER,
             }}
           >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
+              {/* Total Investment */}
               <View>
-                <Text style={{ color: MUTED, fontSize: 13, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: MUTED,
+                    fontSize: 13,
+                    fontWeight: '600',
+                  }}
+                >
                   Total Investment
                 </Text>
-                <Text style={{ color: TEXT, fontSize: 28, fontWeight: '800', marginTop: 4 }}>
+
+                <Text
+                  style={{
+                    color: TEXT,
+                    fontSize: 28,
+                    fontWeight: '800',
+                    marginTop: 4,
+                  }}
+                >
                   {fmt(totalInvestment)}
                 </Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ color: MUTED, fontSize: 13, fontWeight: '600' }}>
+
+              {/* Monthly ROI */}
+              <View
+                style={{
+                  alignItems: 'flex-end',
+                }}
+              >
+                <Text
+                  style={{
+                    color: MUTED,
+                    fontSize: 13,
+                    fontWeight: '600',
+                  }}
+                >
                   Monthly ROI
                 </Text>
-                <Text style={{ color: GREEN, fontSize: 22, fontWeight: '800', marginTop: 4 }}>
+
+                <Text
+                  style={{
+                    color: GREEN,
+                    fontSize: 22,
+                    fontWeight: '800',
+                    marginTop: 4,
+                  }}
+                >
                   {fmt(totalMonthlyROI)}
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* If no investments */}
+          {/* ==================================================
+              NO INVESTMENTS
+          ================================================== */}
+
           {investments.length === 0 && (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <Text style={{ color: MUTED, fontSize: 16 }}>No investments yet</Text>
+            <View
+              style={{
+                padding: 40,
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  color: MUTED,
+                  fontSize: 16,
+                }}
+              >
+                No investments yet
+              </Text>
             </View>
           )}
 
-          {/* Plan Groups with Horizontal Scroll */}
+          {/* ==================================================
+              PLAN GROUPS
+          ================================================== */}
+
           {planGroups.map(([planName, invs]) => (
-            <View key={planName} style={{ marginBottom: 24 }}>
-              {/* Plan Header */}
+            <View
+              key={planName}
+              style={{
+                marginBottom: 24,
+              }}
+            >
+              {/* ==================================================
+                  PLAN HEADER
+              ================================================== */}
+
               <View
                 style={{
                   backgroundColor: CARD,
@@ -335,184 +723,303 @@ export default function InvestmentsScreen() {
                   borderWidth: 1,
                   borderColor: BORDER,
                   shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
                   shadowOpacity: 0.04,
                   shadowRadius: 8,
                   elevation: 2,
                 }}
               >
-                <View style={{ backgroundColor: LIGHT_GREEN, borderRadius: 12, padding: 10 }}>
-                  <Wallet size={22} color={GREEN} />
+                <View
+                  style={{
+                    backgroundColor: LIGHT_GREEN,
+                    borderRadius: 12,
+                    padding: 10,
+                  }}
+                >
+                  <Wallet
+                    size={22}
+                    color={GREEN}
+                  />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: TEXT, fontSize: 16, fontWeight: '800' }}>{planName}</Text>
-                  <Text style={{ color: MUTED, fontSize: 12, marginTop: 2 }}>
-                    {invs.length} Investment{invs.length > 1 ? 's' : ''} ·{' '}
-                    {fmt(invs.reduce((s, i) => s + parseFloat(i.amount), 0))} total
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={MUTED} />
-              </View>
 
-              {/* Horizontal Scroll of Investments */}
-              <FlatList
-                data={invs}
-                // horizontal
-                keyExtractor={(item) => item.id}
-                style={{marginBottom:50}}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() => setSelectedInv(item)}
+                <View
+                  style={{
+                    flex: 1,
+                  }}
+                >
+                  <Text
                     style={{
-                      backgroundColor: CARD,
-                      borderRadius: 16,
-                      padding: 15,
-                      marginVertical: 8,
-                      borderWidth: 1,
-                      borderColor: BORDER,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.04,
-                      shadowRadius: 8,
-                      elevation: 2,
+                      color: TEXT,
+                      fontSize: 16,
+                      fontWeight: '800',
                     }}
                   >
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 14,
-                      }}
-                    >
-                      <View>
-                        <Text style={{ color: MUTED, fontSize: 11, fontWeight: '500' }}>
-                          ID
-                        </Text>
+                    {planName}
+                  </Text>
 
-                        <Text
-                          style={{
-                            color: TEXT,
-                            fontSize: 16,
-                            fontWeight: '700',
-                            marginTop: 2,
-                          }}
-                        >
-                          {item.InvestmentCode}
-                        </Text>
-                      </View>
+                  <Text
+                    style={{
+                      color: MUTED,
+                      fontSize: 12,
+                      marginTop: 2,
+                    }}
+                  >
+                    {invs.length} Investment
+                    {invs.length > 1 ? 's' : ''} ·{' '}
+                    {fmt(
+                      invs.reduce(
+                        (s, i) =>
+                          s + (parseFloat(i.amount) || 0),
+                        0
+                      )
+                    )}{' '}
+                    total
+                  </Text>
+                </View>
 
-                      <View
+                <ChevronRight
+                  size={18}
+                  color={MUTED}
+                />
+              </View>
+
+              {/* ==================================================
+                  INVESTMENT CARDS
+
+                  IMPORTANT:
+                  Using .map() instead of FlatList.
+                  This prevents vertical FlatList inside
+                  vertical ScrollView scrolling conflict.
+              ================================================== */}
+
+              {invs.map((item, index) => (
+                <TouchableOpacity
+                  key={item.id || item.InvestmentCode || index}
+                  onPress={() => setSelectedInv(item)}
+                  activeOpacity={0.7}
+                  style={{
+                    backgroundColor: CARD,
+                    borderRadius: 16,
+                    padding: 15,
+                    marginVertical: 8,
+                    borderWidth: 1,
+                    borderColor: BORDER,
+                    shadowColor: '#000',
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.04,
+                    shadowRadius: 8,
+                    elevation: 2,
+                  }}
+                >
+                  {/* Card Header */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 14,
+                    }}
+                  >
+                    {/* Investment ID */}
+                    <View>
+                      <Text
                         style={{
-                          backgroundColor:
-                            item.status === 'active'
-                              ? LIGHT_GREEN
-                              : LIGHT_BLUE,
-                          borderRadius: 20,
-                          paddingHorizontal: 14,
-                          paddingVertical: 6,
+                          color: MUTED,
+                          fontSize: 11,
+                          fontWeight: '500',
                         }}
                       >
-                        <Text
-                          style={{
-                            color:
-                              item.status === 'active'
-                                ? GREEN
-                                : BLUE,
-                            fontSize: 12,
-                            fontWeight: '700',
-                          }}
-                        >
-                          {item.status.toUpperCase()}
-                        </Text>
-                      </View>
+                        ID
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: TEXT,
+                          fontSize: 16,
+                          fontWeight: '700',
+                          marginTop: 2,
+                        }}
+                      >
+                        {item.InvestmentCode || 'N/A'}
+                      </Text>
                     </View>
 
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: MUTED, fontSize: 11 }}>
-                          Investment
-                        </Text>
-
-                        <Text
-                          style={{
-                            color: TEXT,
-                            fontSize: 16,
-                            fontWeight: '700',
-                            marginTop: 3,
-                          }}
-                        >
-                          {fmt(item.amount)}
-                        </Text>
-                      </View>
-
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: MUTED, fontSize: 11 }}>
-                          ROI
-                        </Text>
-
-                        <Text
-                          style={{
-                            color: BLUE,
-                            fontSize: 16,
-                            fontWeight: '700',
-                            marginTop: 3,
-                          }}
-                        >
-                          {item.plan?.monthlyReturnPercent || 0}%
-                        </Text>
-                      </View>
-                    </View>
-
+                    {/* Status */}
                     <View
                       style={{
-                        flexDirection: 'row',
-                        marginTop: 14,
-                        paddingTop: 12,
-                        borderTopWidth: 1,
-                        borderTopColor: BORDER,
-                        justifyContent: 'space-between',
+                        backgroundColor:
+                          item.status === 'active'
+                            ? LIGHT_GREEN
+                            : LIGHT_BLUE,
+                        borderRadius: 20,
+                        paddingHorizontal: 14,
+                        paddingVertical: 6,
                       }}
                     >
-                      <View>
-                        <Text style={{ color: MUTED, fontSize: 11 }}>
-                          Maturity
-                        </Text>
-
-                        <Text
-                          style={{
-                            color: TEXT,
-                            fontSize: 13,
-                            fontWeight: '500',
-                            marginTop: 2,
-                          }}
-                        >
-                          {formatDate(item.maturityDate)}
-                        </Text>
-                      </View>
-
-                      <View style={{ alignSelf: 'center' }}>
-                        <Text
-                          style={{
-                            color: BLUE,
-                            fontSize: 12,
-                            fontWeight: '600',
-                          }}
-                        >
-                          View →
-                        </Text>
-                      </View>
+                      <Text
+                        style={{
+                          color:
+                            item.status === 'active'
+                              ? GREEN
+                              : BLUE,
+                          fontSize: 12,
+                          fontWeight: '700',
+                        }}
+                      >
+                        {item.status?.toUpperCase() || 'N/A'}
+                      </Text>
                     </View>
-                  </TouchableOpacity>
-                )}
-              />
+                  </View>
+
+                  {/* Investment / ROI */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 8,
+                    }}
+                  >
+                    {/* Investment */}
+                    <View
+                      style={{
+                        flex: 1,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: MUTED,
+                          fontSize: 11,
+                        }}
+                      >
+                        Investment
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: TEXT,
+                          fontSize: 16,
+                          fontWeight: '700',
+                          marginTop: 3,
+                        }}
+                      >
+                        {fmt(item.amount)}
+                      </Text>
+                    </View>
+
+                    {/* ROI */}
+                    <View
+                      style={{
+                        flex: 1,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: MUTED,
+                          fontSize: 11,
+                        }}
+                      >
+                        ROI
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: BLUE,
+                          fontSize: 16,
+                          fontWeight: '700',
+                          marginTop: 3,
+                        }}
+                      >
+                        {item.plan?.monthlyReturnPercent || 0}%
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Bottom Information */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      marginTop: 14,
+                      paddingTop: 12,
+                      borderTopWidth: 1,
+                      borderTopColor: BORDER,
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {/* Maturity */}
+                    <View>
+                      <Text
+                        style={{
+                          color: MUTED,
+                          fontSize: 11,
+                        }}
+                      >
+                        Maturity
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: TEXT,
+                          fontSize: 13,
+                          fontWeight: '500',
+                          marginTop: 2,
+                        }}
+                      >
+                        {formatDate(item.maturityDate)}
+                      </Text>
+                    </View>
+
+                    {/* View */}
+                    <View
+                      style={{
+                        alignSelf: 'center',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: BLUE,
+                          fontSize: 12,
+                          fontWeight: '600',
+                        }}
+                      >
+                        View →
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
           ))}
+
+          {/* ==================================================
+              DISCLAIMER
+          ================================================== */}
+
+          <View
+            style={{
+              width: '100%',
+              marginTop: 10,
+              marginBottom: 20,
+            }}
+          >
+            <Disclaimer />
+          </View>
+
         </Animated.View>
       </ScrollView>
 
-      <InvestmentModal inv={selectedInv} onClose={() => setSelectedInv(null)} />
+      {/* ======================================================
+          INVESTMENT MODAL
+      ====================================================== */}
+
+      <InvestmentModal
+        inv={selectedInv}
+        onClose={() => setSelectedInv(null)}
+      />
     </View>
   );
 }

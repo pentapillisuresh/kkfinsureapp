@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { authAPI, userAPI } from '../../../api';
 import { removeIsLogin, removeToken, removeUser } from '../../../utils/storage';
 
+import Disclaimer from '../../Disclaimer';
+
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
 const GREEN = '#7CB80B';
@@ -568,6 +570,9 @@ Belgaum – 590019, Karnataka" />
             <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '700' }}>Logout</Text>
           </TouchableOpacity>
         </Animated.View>
+          <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
 
       {/* Image Picker Modal */}

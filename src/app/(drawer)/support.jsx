@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ticketsAPI } from '../../api';
 import KeyboardAvoidingAnimatedView from '../../components/KeyboardAvoidingAnimatedView';
 import { NOTIFICATIONS } from '../../data/mockData';
+import Disclaimer from '../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -394,6 +395,9 @@ export default function SupportScreen() {
               </TouchableOpacity>
             </View>
           </Animated.View>
+             <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
         </ScrollView>
       </View>
     </KeyboardAvoidingAnimatedView>

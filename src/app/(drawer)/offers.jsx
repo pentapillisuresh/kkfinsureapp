@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { offersAPI } from '../../api/offers';
+import Disclaimer from '../Disclaimer';
 
 const BG = '#F5F7FA';
 const CARD = '#FFFFFF';
@@ -377,6 +378,10 @@ export default function OffersScreen() {
             </View>
           )}
         </Animated.View>
+            {/* Disclaimer - Last item at bottom */}
+        <View style={{ marginTop: 20 }}>
+          <Disclaimer />
+        </View>
       </ScrollView>
     </View>
   );
