@@ -3,7 +3,6 @@ import {
   Bell,
   CheckCircle2,
   ChevronRight,
-  Download,
   FileText,
   Menu,
   Wallet,
@@ -22,6 +21,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { investmentsAPI } from '../../../api';
 import { NOTIFICATIONS } from '../../../data/mockData';
 import Disclaimer from '../../Disclaimer';
@@ -33,16 +33,24 @@ const BLUE = '#2B46D5';
 const BORDER = '#E8ECF0';
 const TEXT = '#1A2332';
 const MUTED = '#6B7A8F';
+
 const LIGHT_GREEN = 'rgba(124, 184, 11, 0.1)';
 const LIGHT_BLUE = 'rgba(43, 70, 213, 0.08)';
 
-const fmt = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
+const fmt = (n) =>
+  '₹' + Number(n || 0).toLocaleString('en-IN');
 
-// Helper to format date
+// -----------------------------------------------------
+// Format date
+// -----------------------------------------------------
 const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
 
   const d = new Date(dateStr);
+
+  if (Number.isNaN(d.getTime())) {
+    return 'N/A';
+  }
 
   return d.toLocaleDateString('en-IN', {
     day: '2-digit',
@@ -55,8 +63,43 @@ const formatDate = (dateStr) => {
 // Investment Detail Modal
 // ============================================================
 
-function InvestmentModal({ inv, onClose }) {
+function InvestmentModal({ inv, onClose, router }) {
   if (!inv) return null;
+
+  const handleAgreement = () => {
+    if (!inv?.agreementDoc) {
+      Alert.alert(
+        'Agreement unavailable',
+        'No agreement document is available for this investment.'
+      );
+      return;
+    }
+
+    try {
+      // Close investment details popup first
+      onClose();
+
+      // Open existing document viewer
+      router.push({
+        pathname: '/document-viewer',
+        params: {
+          filePath: String(inv.agreementDoc),
+          title: `Agreement - ${
+            inv.InvestmentCode ||
+            inv.id?.slice(0, 8) ||
+            'Investment'
+          }`,
+        },
+      });
+    } catch (error) {
+      console.log('Agreement navigation error:', error);
+
+      Alert.alert(
+        'Error',
+        'Unable to open the investment agreement.'
+      );
+    }
+  };
 
   return (
     <Modal
@@ -78,7 +121,7 @@ function InvestmentModal({ inv, onClose }) {
             borderTopLeftRadius: 28,
             borderTopRightRadius: 28,
             padding: 28,
-            paddingBottom: 60,
+            paddingBottom: 40,
             shadowColor: '#000',
             shadowOffset: {
               width: 0,
@@ -143,13 +186,19 @@ function InvestmentModal({ inv, onClose }) {
             >
               <CheckCircle2
                 size={14}
-                color={inv.status === 'active' ? GREEN : BLUE}
+                color={
+                  inv.status === 'active'
+                    ? GREEN
+                    : BLUE
+                }
               />
 
               <Text
                 style={{
                   color:
-                    inv.status === 'active' ? GREEN : BLUE,
+                    inv.status === 'active'
+                      ? GREEN
+                      : BLUE,
                   fontSize: 12,
                   fontWeight: '700',
                 }}
@@ -175,13 +224,17 @@ function InvestmentModal({ inv, onClose }) {
             },
             {
               label: 'ROI',
-              value: `${inv.plan?.monthlyReturnPercent || 0}% per month`,
+              value: `${
+                inv.plan?.monthlyReturnPercent || 0
+              }% per month`,
             },
             {
               label: 'Monthly Return',
               value: fmt(
                 (Number(inv.amount || 0) *
-                  Number(inv.plan?.monthlyReturnPercent || 0)) /
+                  Number(
+                    inv.plan?.monthlyReturnPercent || 0
+                  )) /
                   100
               ),
             },
@@ -227,71 +280,39 @@ function InvestmentModal({ inv, onClose }) {
             </View>
           ))}
 
-          {/* Actions */}
+          {/* Agreement Action */}
           <View
             style={{
-              flexDirection: 'row',
-              gap: 12,
               marginTop: 24,
             }}
           >
             <TouchableOpacity
-              onPress={() =>
-                Alert.alert(
-                  'Agreement',
-                  'Opening investment agreement...'
-                )
-              }
+              onPress={handleAgreement}
+              activeOpacity={0.8}
               style={{
-                flex: 1,
+                width: '100%',
                 backgroundColor: BLUE,
                 borderRadius: 14,
-                paddingVertical: 14,
+                paddingVertical: 15,
                 alignItems: 'center',
                 flexDirection: 'row',
                 justifyContent: 'center',
                 gap: 8,
               }}
             >
-              <FileText size={16} color="#fff" />
+              <FileText
+                size={18}
+                color="#FFFFFF"
+              />
 
               <Text
                 style={{
-                  color: '#fff',
+                  color: '#FFFFFF',
                   fontWeight: '700',
+                  fontSize: 14,
                 }}
               >
                 Agreement
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                Alert.alert(
-                  'Certificate',
-                  'Downloading investment certificate...'
-                )
-              }
-              style={{
-                flex: 1,
-                backgroundColor: LIGHT_BLUE,
-                borderRadius: 14,
-                paddingVertical: 14,
-                alignItems: 'center',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              <Download size={16} color={BLUE} />
-
-              <Text
-                style={{
-                  color: BLUE,
-                  fontWeight: '700',
-                }}
-              >
-                Certificate
               </Text>
             </TouchableOpacity>
           </View>
@@ -314,7 +335,9 @@ export default function InvestmentsScreen() {
   const [investments, setInvestments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(
+    new Animated.Value(0)
+  ).current;
 
   // ============================================================
   // Fetch Investments
@@ -334,13 +357,17 @@ export default function InvestmentsScreen() {
     try {
       setLoading(true);
 
-      const response = await investmentsAPI.getMyInvestments();
+      const response =
+        await investmentsAPI.getMyInvestments();
 
       if (response.success) {
         setInvestments(response.data || []);
       }
     } catch (error) {
-      console.error('Fetch investments error:', error);
+      console.error(
+        'Fetch investments error:',
+        error
+      );
 
       Alert.alert(
         'Error',
@@ -356,18 +383,26 @@ export default function InvestmentsScreen() {
   // ============================================================
 
   const totalInvestment = investments.reduce(
-    (s, i) => s + (parseFloat(i.amount) || 0),
+    (s, i) =>
+      s + (parseFloat(i.amount) || 0),
     0
   );
 
   const totalMonthlyROI = investments
     .filter((i) => i.status === 'active')
     .reduce((sum, i) => {
-      const amount = parseFloat(i.amount) || 0;
-      const monthlyPercent =
-        parseFloat(i.plan?.monthlyReturnPercent) || 0;
+      const amount =
+        parseFloat(i.amount) || 0;
 
-      return sum + (amount * monthlyPercent) / 100;
+      const monthlyPercent =
+        parseFloat(
+          i.plan?.monthlyReturnPercent
+        ) || 0;
+
+      return (
+        sum +
+        (amount * monthlyPercent) / 100
+      );
     }, 0);
 
   const unreadCount = NOTIFICATIONS.filter(
@@ -391,7 +426,8 @@ export default function InvestmentsScreen() {
     groupedByPlan[planName].push(inv);
   });
 
-  const planGroups = Object.entries(groupedByPlan);
+  const planGroups =
+    Object.entries(groupedByPlan);
 
   // ============================================================
   // Loading Screen
@@ -448,7 +484,9 @@ export default function InvestmentsScreen() {
         >
           {/* Menu */}
           <TouchableOpacity
-            onPress={() => navigation.openDrawer()}
+            onPress={() =>
+              navigation.openDrawer()
+            }
           >
             <Menu
               color="#FFFFFF"
@@ -488,7 +526,8 @@ export default function InvestmentsScreen() {
 
             <Text
               style={{
-                color: 'rgba(255,255,255,0.7)',
+                color:
+                  'rgba(255,255,255,0.7)',
                 fontSize: 9,
                 fontWeight: '500',
                 letterSpacing: 0.3,
@@ -501,7 +540,9 @@ export default function InvestmentsScreen() {
 
           {/* Notifications */}
           <TouchableOpacity
-            onPress={() => router.push('/notifications')}
+            onPress={() =>
+              router.push('/notifications')
+            }
             style={{
               position: 'relative',
             }}
@@ -557,7 +598,8 @@ export default function InvestmentsScreen() {
 
           <Text
             style={{
-              color: 'rgba(255,255,255,0.7)',
+              color:
+                'rgba(255,255,255,0.7)',
               fontSize: 14,
               marginTop: 4,
             }}
@@ -578,10 +620,8 @@ export default function InvestmentsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16,
-
-          // IMPORTANT:
-          // Extra bottom space so Disclaimer is never hidden
-          paddingBottom: insets.bottom + 80,
+          paddingBottom:
+            insets.bottom + 80,
         }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -616,7 +656,8 @@ export default function InvestmentsScreen() {
             <View
               style={{
                 flexDirection: 'row',
-                justifyContent: 'space-between',
+                justifyContent:
+                  'space-between',
                 alignItems: 'flex-start',
               }}
             >
@@ -700,111 +741,24 @@ export default function InvestmentsScreen() {
               PLAN GROUPS
           ================================================== */}
 
-          {planGroups.map(([planName, invs]) => (
-            <View
-              key={planName}
-              style={{
-                marginBottom: 24,
-              }}
-            >
-              {/* ==================================================
-                  PLAN HEADER
-              ================================================== */}
-
+          {planGroups.map(
+            ([planName, invs]) => (
               <View
+                key={planName}
                 style={{
-                  backgroundColor: CARD,
-                  borderRadius: 16,
-                  padding: 16,
-                  marginBottom: 12,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 14,
-                  borderWidth: 1,
-                  borderColor: BORDER,
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.04,
-                  shadowRadius: 8,
-                  elevation: 2,
+                  marginBottom: 24,
                 }}
               >
+                {/* PLAN HEADER */}
                 <View
-                  style={{
-                    backgroundColor: LIGHT_GREEN,
-                    borderRadius: 12,
-                    padding: 10,
-                  }}
-                >
-                  <Wallet
-                    size={22}
-                    color={GREEN}
-                  />
-                </View>
-
-                <View
-                  style={{
-                    flex: 1,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: TEXT,
-                      fontSize: 16,
-                      fontWeight: '800',
-                    }}
-                  >
-                    {planName}
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: MUTED,
-                      fontSize: 12,
-                      marginTop: 2,
-                    }}
-                  >
-                    {invs.length} Investment
-                    {invs.length > 1 ? 's' : ''} ·{' '}
-                    {fmt(
-                      invs.reduce(
-                        (s, i) =>
-                          s + (parseFloat(i.amount) || 0),
-                        0
-                      )
-                    )}{' '}
-                    total
-                  </Text>
-                </View>
-
-                <ChevronRight
-                  size={18}
-                  color={MUTED}
-                />
-              </View>
-
-              {/* ==================================================
-                  INVESTMENT CARDS
-
-                  IMPORTANT:
-                  Using .map() instead of FlatList.
-                  This prevents vertical FlatList inside
-                  vertical ScrollView scrolling conflict.
-              ================================================== */}
-
-              {invs.map((item, index) => (
-                <TouchableOpacity
-                  key={item.id || item.InvestmentCode || index}
-                  onPress={() => setSelectedInv(item)}
-                  activeOpacity={0.7}
                   style={{
                     backgroundColor: CARD,
                     borderRadius: 16,
-                    padding: 15,
-                    marginVertical: 8,
+                    padding: 16,
+                    marginBottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 14,
                     borderWidth: 1,
                     borderColor: BORDER,
                     shadowColor: '#000',
@@ -817,183 +771,287 @@ export default function InvestmentsScreen() {
                     elevation: 2,
                   }}
                 >
-                  {/* Card Header */}
                   <View
                     style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 14,
+                      backgroundColor:
+                        LIGHT_GREEN,
+                      borderRadius: 12,
+                      padding: 10,
                     }}
                   >
-                    {/* Investment ID */}
-                    <View>
-                      <Text
-                        style={{
-                          color: MUTED,
-                          fontSize: 11,
-                          fontWeight: '500',
-                        }}
-                      >
-                        ID
-                      </Text>
-
-                      <Text
-                        style={{
-                          color: TEXT,
-                          fontSize: 16,
-                          fontWeight: '700',
-                          marginTop: 2,
-                        }}
-                      >
-                        {item.InvestmentCode || 'N/A'}
-                      </Text>
-                    </View>
-
-                    {/* Status */}
-                    <View
-                      style={{
-                        backgroundColor:
-                          item.status === 'active'
-                            ? LIGHT_GREEN
-                            : LIGHT_BLUE,
-                        borderRadius: 20,
-                        paddingHorizontal: 14,
-                        paddingVertical: 6,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color:
-                            item.status === 'active'
-                              ? GREEN
-                              : BLUE,
-                          fontSize: 12,
-                          fontWeight: '700',
-                        }}
-                      >
-                        {item.status?.toUpperCase() || 'N/A'}
-                      </Text>
-                    </View>
+                    <Wallet
+                      size={22}
+                      color={GREEN}
+                    />
                   </View>
 
-                  {/* Investment / ROI */}
                   <View
                     style={{
-                      flexDirection: 'row',
-                      gap: 8,
+                      flex: 1,
                     }}
                   >
-                    {/* Investment */}
-                    <View
+                    <Text
                       style={{
-                        flex: 1,
+                        color: TEXT,
+                        fontSize: 16,
+                        fontWeight: '800',
                       }}
                     >
-                      <Text
-                        style={{
-                          color: MUTED,
-                          fontSize: 11,
-                        }}
-                      >
-                        Investment
-                      </Text>
+                      {planName}
+                    </Text>
 
-                      <Text
-                        style={{
-                          color: TEXT,
-                          fontSize: 16,
-                          fontWeight: '700',
-                          marginTop: 3,
-                        }}
-                      >
-                        {fmt(item.amount)}
-                      </Text>
-                    </View>
-
-                    {/* ROI */}
-                    <View
+                    <Text
                       style={{
-                        flex: 1,
+                        color: MUTED,
+                        fontSize: 12,
+                        marginTop: 2,
                       }}
                     >
-                      <Text
-                        style={{
-                          color: MUTED,
-                          fontSize: 11,
-                        }}
-                      >
-                        ROI
-                      </Text>
-
-                      <Text
-                        style={{
-                          color: BLUE,
-                          fontSize: 16,
-                          fontWeight: '700',
-                          marginTop: 3,
-                        }}
-                      >
-                        {item.plan?.monthlyReturnPercent || 0}%
-                      </Text>
-                    </View>
+                      {invs.length} Investment
+                      {invs.length > 1
+                        ? 's'
+                        : ''}{' '}
+                      ·{' '}
+                      {fmt(
+                        invs.reduce(
+                          (s, i) =>
+                            s +
+                            (parseFloat(
+                              i.amount
+                            ) || 0),
+                          0
+                        )
+                      )}{' '}
+                      total
+                    </Text>
                   </View>
 
-                  {/* Bottom Information */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      marginTop: 14,
-                      paddingTop: 12,
-                      borderTopWidth: 1,
-                      borderTopColor: BORDER,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    {/* Maturity */}
-                    <View>
-                      <Text
-                        style={{
-                          color: MUTED,
-                          fontSize: 11,
-                        }}
-                      >
-                        Maturity
-                      </Text>
+                  <ChevronRight
+                    size={18}
+                    color={MUTED}
+                  />
+                </View>
 
-                      <Text
-                        style={{
-                          color: TEXT,
-                          fontSize: 13,
-                          fontWeight: '500',
-                          marginTop: 2,
-                        }}
-                      >
-                        {formatDate(item.maturityDate)}
-                      </Text>
-                    </View>
-
-                    {/* View */}
-                    <View
+                {/* INVESTMENT CARDS */}
+                {invs.map(
+                  (item, index) => (
+                    <TouchableOpacity
+                      key={
+                        item.id ||
+                        item.InvestmentCode ||
+                        index
+                      }
+                      onPress={() =>
+                        setSelectedInv(item)
+                      }
+                      activeOpacity={0.7}
                       style={{
-                        alignSelf: 'center',
+                        backgroundColor: CARD,
+                        borderRadius: 16,
+                        padding: 15,
+                        marginVertical: 8,
+                        borderWidth: 1,
+                        borderColor: BORDER,
+                        shadowColor: '#000',
+                        shadowOffset: {
+                          width: 0,
+                          height: 2,
+                        },
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        elevation: 2,
                       }}
                     >
-                      <Text
+                      {/* Card Header */}
+                      <View
                         style={{
-                          color: BLUE,
-                          fontSize: 12,
-                          fontWeight: '600',
+                          flexDirection: 'row',
+                          justifyContent:
+                            'space-between',
+                          alignItems: 'center',
+                          marginBottom: 14,
                         }}
                       >
-                        View →
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ))}
+                        {/* Investment ID */}
+                        <View>
+                          <Text
+                            style={{
+                              color: MUTED,
+                              fontSize: 11,
+                              fontWeight: '500',
+                            }}
+                          >
+                            ID
+                          </Text>
+
+                          <Text
+                            style={{
+                              color: TEXT,
+                              fontSize: 16,
+                              fontWeight: '700',
+                              marginTop: 2,
+                            }}
+                          >
+                            {item.InvestmentCode ||
+                              'N/A'}
+                          </Text>
+                        </View>
+
+                        {/* Status */}
+                        <View
+                          style={{
+                            backgroundColor:
+                              item.status ===
+                              'active'
+                                ? LIGHT_GREEN
+                                : LIGHT_BLUE,
+                            borderRadius: 20,
+                            paddingHorizontal: 14,
+                            paddingVertical: 6,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color:
+                                item.status ===
+                                'active'
+                                  ? GREEN
+                                  : BLUE,
+                              fontSize: 12,
+                              fontWeight: '700',
+                            }}
+                          >
+                            {item.status?.toUpperCase() ||
+                              'N/A'}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Investment / ROI */}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 8,
+                        }}
+                      >
+                        {/* Investment */}
+                        <View
+                          style={{
+                            flex: 1,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: MUTED,
+                              fontSize: 11,
+                            }}
+                          >
+                            Investment
+                          </Text>
+
+                          <Text
+                            style={{
+                              color: TEXT,
+                              fontSize: 16,
+                              fontWeight: '700',
+                              marginTop: 3,
+                            }}
+                          >
+                            {fmt(item.amount)}
+                          </Text>
+                        </View>
+
+                        {/* ROI */}
+                        <View
+                          style={{
+                            flex: 1,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: MUTED,
+                              fontSize: 11,
+                            }}
+                          >
+                            ROI
+                          </Text>
+
+                          <Text
+                            style={{
+                              color: BLUE,
+                              fontSize: 16,
+                              fontWeight: '700',
+                              marginTop: 3,
+                            }}
+                          >
+                            {item.plan
+                              ?.monthlyReturnPercent ||
+                              0}
+                            %
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Bottom Information */}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          marginTop: 14,
+                          paddingTop: 12,
+                          borderTopWidth: 1,
+                          borderTopColor: BORDER,
+                          justifyContent:
+                            'space-between',
+                        }}
+                      >
+                        {/* Maturity */}
+                        <View>
+                          <Text
+                            style={{
+                              color: MUTED,
+                              fontSize: 11,
+                            }}
+                          >
+                            Maturity
+                          </Text>
+
+                          <Text
+                            style={{
+                              color: TEXT,
+                              fontSize: 13,
+                              fontWeight: '500',
+                              marginTop: 2,
+                            }}
+                          >
+                            {formatDate(
+                              item.maturityDate
+                            )}
+                          </Text>
+                        </View>
+
+                        {/* View */}
+                        <View
+                          style={{
+                            alignSelf: 'center',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: BLUE,
+                              fontSize: 12,
+                              fontWeight: '600',
+                            }}
+                          >
+                            View →
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  )
+                )}
+              </View>
+            )
+          )}
 
           {/* ==================================================
               DISCLAIMER
@@ -1008,7 +1066,6 @@ export default function InvestmentsScreen() {
           >
             <Disclaimer />
           </View>
-
         </Animated.View>
       </ScrollView>
 
@@ -1018,7 +1075,10 @@ export default function InvestmentsScreen() {
 
       <InvestmentModal
         inv={selectedInv}
-        onClose={() => setSelectedInv(null)}
+        onClose={() =>
+          setSelectedInv(null)
+        }
+        router={router}
       />
     </View>
   );
