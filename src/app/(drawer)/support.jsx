@@ -1,5 +1,5 @@
 import { useNavigation, useRouter } from 'expo-router';
-import { ArrowRight, Bell, Headphones, Mail, Menu, Phone, Send, User } from 'lucide-react-native';
+import { ArrowRight, Headphones, Mail, Menu, Phone, Send, User } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Image, Linking, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -111,7 +111,7 @@ export default function SupportScreen() {
       </Text>
     </View>
 
-    <TouchableOpacity
+    {/* <TouchableOpacity
       onPress={() => router.push('/notifications')}
       style={{ position: 'relative' }}
     >
@@ -133,7 +133,7 @@ export default function SupportScreen() {
           <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{unreadCount}</Text>
         </View>
       )}
-    </TouchableOpacity>
+    </TouchableOpacity> */}
   </View>
 
   {/* Title */}

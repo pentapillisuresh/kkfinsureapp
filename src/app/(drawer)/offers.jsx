@@ -1,5 +1,5 @@
 import { useNavigation, useRouter } from 'expo-router';
-import { Bell, Gift, Menu, Sparkles, Tag } from 'lucide-react-native';
+import { Gift, Menu, Sparkles, Tag } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -113,7 +113,7 @@ export default function OffersScreen() {
       </Text>
     </View>
 
-    <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
+    {/* <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
       <Bell color="#FFFFFF" size={24} />
       {unreadCount > 0 && (
         <View
@@ -132,7 +132,7 @@ export default function OffersScreen() {
           <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{unreadCount}</Text>
         </View>
       )}
-    </TouchableOpacity>
+    </TouchableOpacity> */}
   </View>
 
   <View style={{ marginTop: 16 }}>

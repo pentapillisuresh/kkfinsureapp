@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import { Bell, Menu, TrendingUp } from 'lucide-react-native';
+import { Menu, TrendingUp } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -433,7 +433,7 @@ export default function ROIScreen() {
           </View>
 
           {/* Notification */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() =>
               router.push(
                 '/notifications'
@@ -447,7 +447,7 @@ export default function ROIScreen() {
               color="#FFFFFF"
               size={24}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Page Title */}

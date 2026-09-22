@@ -1,5 +1,5 @@
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import { AlertCircle, Bell, CheckCircle, ChevronRight, Clock, Menu, Send, Ticket, X, XCircle } from 'lucide-react-native';
+import { AlertCircle, CheckCircle, ChevronRight, Clock, Menu, Send, Ticket, X, XCircle } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Image, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -187,7 +187,7 @@ export default function TicketsScreen() {
             </Text>
           </View>
 
-          <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
+          {/* <TouchableOpacity onPress={() => router.push('/notifications')} style={{ position: 'relative' }}>
             <Bell color="#FFFFFF" size={24} />
             {unreadCount > 0 && (
               <View
@@ -206,7 +206,7 @@ export default function TicketsScreen() {
                 <Text style={{ color: '#fff', fontSize: 9, fontWeight: '700' }}>{unreadCount}</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <View style={{ marginTop: 16 }}>

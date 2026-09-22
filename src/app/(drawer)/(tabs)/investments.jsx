@@ -1,12 +1,11 @@
 import { useNavigation, useRouter } from 'expo-router';
 import {
-  Bell,
   CheckCircle2,
   ChevronRight,
   FileText,
   Menu,
   Wallet,
-  X,
+  X
 } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -84,11 +83,10 @@ function InvestmentModal({ inv, onClose, router }) {
         pathname: '/document-viewer',
         params: {
           filePath: String(inv.agreementDoc),
-          title: `Agreement - ${
-            inv.InvestmentCode ||
+          title: `Agreement - ${inv.InvestmentCode ||
             inv.id?.slice(0, 8) ||
             'Investment'
-          }`,
+            }`,
         },
       });
     } catch (error) {
@@ -97,6 +95,74 @@ function InvestmentModal({ inv, onClose, router }) {
       Alert.alert(
         'Error',
         'Unable to open the investment agreement.'
+      );
+    }
+  };
+
+  const handleCertificate = () => {
+    if (!inv?.certificateDoc) {
+      Alert.alert(
+        'Certificate unavailable',
+        'No certificate document is available for this investment.'
+      );
+      return;
+    }
+
+    try {
+      // Close investment details popup first
+      onClose();
+
+      // Open existing document viewer
+      router.push({
+        pathname: '/document-viewer',
+        params: {
+          filePath: String(inv.certificateDoc),
+          title: `Certificate - ${inv.InvestmentCode ||
+            inv.id?.slice(0, 8) ||
+            'Investment'
+            }`,
+        },
+      });
+    } catch (error) {
+      console.log('Certificate navigation error:', error);
+
+      Alert.alert(
+        'Error',
+        'Unable to open the investment certificate.'
+      );
+    }
+  };
+
+  const handlePostCheque = () => {
+    if (!inv?.postChequeDoc) {
+      Alert.alert(
+        'PostCheque unavailable',
+        'No postCheque document is available for this investment.'
+      );
+      return;
+    }
+
+    try {
+      // Close investment details popup first
+      onClose();
+
+      // Open existing document viewer
+      router.push({
+        pathname: '/document-viewer',
+        params: {
+          filePath: String(inv.postChequeDoc),
+          title: `PostCheque - ${inv.InvestmentCode ||
+            inv.id?.slice(0, 8) ||
+            'Investment'
+            }`,
+        },
+      });
+    } catch (error) {
+      console.log('PostCheque navigation error:', error);
+
+      Alert.alert(
+        'Error',
+        'Unable to open the investment PostCheque.'
       );
     }
   };
@@ -224,9 +290,8 @@ function InvestmentModal({ inv, onClose, router }) {
             },
             {
               label: 'ROI',
-              value: `${
-                inv.plan?.monthlyReturnPercent || 0
-              }% per month`,
+              value: `${inv.plan?.monthlyReturnPercent || 0
+                }% per month`,
             },
             {
               label: 'Monthly Return',
@@ -235,7 +300,7 @@ function InvestmentModal({ inv, onClose, router }) {
                   Number(
                     inv.plan?.monthlyReturnPercent || 0
                   )) /
-                  100
+                100
               ),
             },
             {
@@ -284,35 +349,92 @@ function InvestmentModal({ inv, onClose, router }) {
           <View
             style={{
               marginTop: 24,
+              flexDirection: 'row',
+              gap: 10,
+              width: '100%',
             }}
           >
+            {/* Agreement */}
             <TouchableOpacity
               onPress={handleAgreement}
               activeOpacity={0.8}
               style={{
-                width: '100%',
+                flex: 1,
                 backgroundColor: BLUE,
                 borderRadius: 14,
                 paddingVertical: 15,
                 alignItems: 'center',
-                flexDirection: 'row',
                 justifyContent: 'center',
-                gap: 8,
+                flexDirection: 'row',
+                gap: 6,
               }}
             >
-              <FileText
-                size={18}
-                color="#FFFFFF"
-              />
+              <FileText size={18} color="#FFFFFF" />
 
               <Text
                 style={{
                   color: '#FFFFFF',
                   fontWeight: '700',
-                  fontSize: 14,
+                  fontSize: 12,
                 }}
               >
                 Agreement
+              </Text>
+            </TouchableOpacity>
+
+            {/* Certificate */}
+            <TouchableOpacity
+              onPress={handleCertificate}
+              activeOpacity={0.8}
+              style={{
+                flex: 1,
+                backgroundColor: BLUE,
+                borderRadius: 14,
+                paddingVertical: 15,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+                gap: 6,
+              }}
+            >
+              <FileText size={18} color="#FFFFFF" />
+
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                  fontSize: 12,
+                }}
+              >
+                Certificate
+              </Text>
+            </TouchableOpacity>
+
+            {/* Post Cheque */}
+            <TouchableOpacity
+              onPress={handlePostCheque}
+              activeOpacity={0.8}
+              style={{
+                flex: 1,
+                backgroundColor: BLUE,
+                borderRadius: 14,
+                paddingVertical: 15,
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+                gap: 6,
+              }}
+            >
+              <FileText size={18} color="#FFFFFF" />
+
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                  fontSize: 12,
+                }}
+              >
+                Post Cheque
               </Text>
             </TouchableOpacity>
           </View>
@@ -539,7 +661,7 @@ export default function InvestmentsScreen() {
           </View>
 
           {/* Notifications */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() =>
               router.push('/notifications')
             }
@@ -577,7 +699,7 @@ export default function InvestmentsScreen() {
                 </Text>
               </View>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Page Title */}
@@ -902,7 +1024,7 @@ export default function InvestmentsScreen() {
                           style={{
                             backgroundColor:
                               item.status ===
-                              'active'
+                                'active'
                                 ? LIGHT_GREEN
                                 : LIGHT_BLUE,
                             borderRadius: 20,
@@ -914,7 +1036,7 @@ export default function InvestmentsScreen() {
                             style={{
                               color:
                                 item.status ===
-                                'active'
+                                  'active'
                                   ? GREEN
                                   : BLUE,
                               fontSize: 12,

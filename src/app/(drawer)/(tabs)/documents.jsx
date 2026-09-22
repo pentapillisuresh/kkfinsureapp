@@ -5,7 +5,6 @@ import {
 } from 'expo-router';
 
 import {
-  Bell,
   Building2,
   DockIcon,
   Download,
@@ -15,7 +14,7 @@ import {
   IndentIcon,
   LucidePaperclip,
   Menu,
-  UserCheck,
+  UserCheck
 } from 'lucide-react-native';
 
 import Disclaimer from '../../Disclaimer';
@@ -783,7 +782,7 @@ export default function DocumentsScreen() {
           </View>
 
           {/* Notifications */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() =>
               router.push(
                 '/notifications'
@@ -795,7 +794,7 @@ export default function DocumentsScreen() {
               color="#FFFFFF"
               size={24}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Title */}
